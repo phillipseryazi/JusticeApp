@@ -2,10 +2,13 @@ package com.mudhut.software.justiceapp.onboarding.views
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -45,19 +48,35 @@ fun OnBoardingScreen(
                 }
                 OnBoardingPageIndicator(state = pagerState)
             }
-            if (pagerState.currentPage == 3) {
-                Button(
-                    onClick = { /*TODO*/ },
-                    modifier = Modifier
-                        .padding(bottom = 32.dp)
-                        .align(Alignment.CenterHorizontally)
-                ) {
-                    Text(
-                        context.getString(R.string.get_started),
-                        style = MaterialTheme.typography.body1
-                    )
+            Column(modifier = Modifier.fillMaxWidth()) {
+                if (pagerState.currentPage == 3) {
+                    Button(
+
+                        colors = ButtonDefaults.buttonColors(
+                            contentColor = Color.White
+                        ),
+                        onClick = { /*TODO*/ },
+                        modifier = Modifier
+                            .size(width = 140.dp, height = 50.dp)
+                            .align(Alignment.CenterHorizontally)
+                            .clip(RoundedCornerShape(8.dp))
+                    ) {
+                        Text(
+                            context.getString(R.string.get_started),
+                            style = MaterialTheme.typography.body1,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                        )
+                    }
                 }
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(32.dp)
+                )
             }
+
         }
     }
 }
