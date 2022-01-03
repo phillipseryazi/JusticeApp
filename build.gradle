@@ -2,7 +2,7 @@
 buildscript {
     ext {
         compose_version = '1.0.5'
-        compose_pager = '0.13.0'
+        compose_pager = '0.22.0-rc'
         compose_constraint_layout = '1.0.0-rc02'
     }
     repositories {

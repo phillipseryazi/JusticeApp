@@ -12,7 +12,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.*
 import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.onboarding.models.OnBoardingStep
 import com.mudhut.software.justiceapp.onboarding.models.getOnBoardingSteps
@@ -23,43 +23,39 @@ import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 fun OnBoardingScreen(
 ) {
     val context = LocalContext.current
-    val step = getOnBoardingSteps(context = context)
+    val steps = getOnBoardingSteps(context = context)
 
     val scaffoldState = rememberScaffoldState()
+    val pagerState = rememberPagerState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         scaffoldState = scaffoldState
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            OnBoardingInformationSection(step = step[0])
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 32.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Button(
-                    onClick = { /*TODO*/ },
-                    modifier = Modifier.padding(
-                        top = 16.dp,
-                        bottom = 16.dp,
-                        start = 16.dp,
-                        end = 16.dp
-                    )
-                ) {
-                    Text(context.getString(R.string.text_back))
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                HorizontalPager(
+                    count = steps.size,
+                    state = pagerState
+                ) { page ->
+                    OnBoardingInformationSection(step = steps[page])
                 }
+                OnBoardingPageIndicator(state = pagerState)
+            }
+            if (pagerState.currentPage == 3) {
                 Button(
                     onClick = { /*TODO*/ },
-                    modifier = Modifier.padding(
-                        top = 16.dp,
-                        bottom = 16.dp,
-                        start = 16.dp,
-                        end = 16.dp
-                    )
+                    modifier = Modifier
+                        .padding(bottom = 32.dp)
+                        .align(Alignment.CenterHorizontally)
                 ) {
-                    Text(context.getString(R.string.text_next))
+                    Text(
+                        context.getString(R.string.get_started),
+                        style = MaterialTheme.typography.body1
+                    )
                 }
             }
         }
@@ -68,13 +64,20 @@ fun OnBoardingScreen(
 
 @Composable
 fun OnBoardingInformationSection(step: OnBoardingStep) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 32.dp)
+    ) {
         Image(
             painter = painterResource(id = step.illustration),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 32.dp, end = 16.dp, start = 16.dp)
+                .padding(
+                    end = 16.dp,
+                    start = 16.dp
+                )
                 .height(250.dp),
             alignment = Alignment.BottomCenter,
             contentScale = ContentScale.Inside
@@ -95,6 +98,19 @@ fun OnBoardingInformationSection(step: OnBoardingStep) {
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.body1
         )
+    }
+}
+
+@ExperimentalPagerApi
+@Composable
+fun OnBoardingPageIndicator(state: PagerState) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp, bottom = 16.dp),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        HorizontalPagerIndicator(pagerState = state)
     }
 }
 
