@@ -98,7 +98,6 @@ fun LoginSection(context: Context) {
             style = MaterialTheme.typography.body1
         )
     }
-
 }
 
 @Composable
@@ -143,7 +142,9 @@ fun SocialLoginSection(context: Context) {
                 backgroundColor = Color.Red,
                 contentColor = Color.White
             ),
-            modifier = Modifier.width(270.dp)
+            modifier = Modifier
+                .width(270.dp)
+                .clip(RoundedCornerShape(8.dp))
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_icon_google),
@@ -168,7 +169,9 @@ fun SocialLoginSection(context: Context) {
                 contentColor = Color.Black,
                 backgroundColor = Color.White
             ),
-            modifier = Modifier.width(270.dp)
+            modifier = Modifier
+                .width(270.dp)
+                .clip(RoundedCornerShape(8.dp))
         ) {
             Icon(
                 painter = painterResource(
