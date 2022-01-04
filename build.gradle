@@ -4,6 +4,7 @@ buildscript {
         compose_version = '1.0.5'
         compose_pager = '0.22.0-rc'
         compose_constraint_layout = '1.0.0-rc02'
+        compose_navigation = '2.4.0-rc01'
     }
     repositories {
         google()

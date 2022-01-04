@@ -69,4 +69,7 @@ dependencies {
     // Paging Compose
     implementation "com.google.accompanist:accompanist-pager:$compose_pager"
     implementation "com.google.accompanist:accompanist-pager-indicators:$compose_pager"
+
+    // navigation
+    implementation "androidx.navigation:navigation-compose:$compose_navigation"
 }
