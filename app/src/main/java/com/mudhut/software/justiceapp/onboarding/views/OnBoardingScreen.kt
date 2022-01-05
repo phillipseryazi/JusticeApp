@@ -24,6 +24,7 @@ import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 @ExperimentalPagerApi
 @Composable
 fun OnBoardingScreen(
+    navigateToLogin: () -> Unit
 ) {
     val context = LocalContext.current
     val steps = getOnBoardingSteps(context = context)
@@ -55,7 +56,9 @@ fun OnBoardingScreen(
                         colors = ButtonDefaults.buttonColors(
                             contentColor = Color.White
                         ),
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            navigateToLogin()
+                        },
                         modifier = Modifier
                             .size(width = 140.dp, height = 50.dp)
                             .align(Alignment.CenterHorizontally)
@@ -138,6 +141,6 @@ fun OnBoardingPageIndicator(state: PagerState) {
 @Composable
 fun OnBoardingScreenPreview() {
     JusticeAppTheme {
-        OnBoardingScreen()
+        OnBoardingScreen(navigateToLogin = {})
     }
 }
