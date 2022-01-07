@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mudhut.software.justiceapp.R
+import com.mudhut.software.justiceapp.authentication.viewmodels.AuthUiState
 import com.mudhut.software.justiceapp.authentication.viewmodels.AuthenticationViewModel
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 
@@ -29,6 +31,7 @@ fun LoginScreen(
     viewModel: AuthenticationViewModel = viewModel()
 ) {
     val scaffoldState = rememberScaffoldState()
+    val uiState by viewModel.loginUiState
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -43,7 +46,8 @@ fun LoginScreen(
             LoginSection(
                 navigateToHome,
                 navigateToRegistration,
-                viewModel = viewModel
+                viewModel = viewModel,
+                uiState
             )
             Spacer(modifier = Modifier.height(24.dp))
             OrSection()
@@ -69,7 +73,8 @@ fun LoginTitleSection() {
 fun LoginSection(
     navigateToHome: () -> Unit,
     navigateToRegistration: () -> Unit,
-    viewModel: AuthenticationViewModel
+    viewModel: AuthenticationViewModel,
+    uiState: AuthUiState.LoginUiState
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -77,22 +82,26 @@ fun LoginSection(
     ) {
         OutlinedTextField(
             modifier = Modifier.width(270.dp),
-            value = "",
-            label = { Text(stringResource(R.string.username)) },
-            onValueChange = {},
+            value = uiState.email,
+            label = { Text(stringResource(R.string.email)) },
+            onValueChange = {
+                viewModel.changeLoginEmail(it)
+            },
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             modifier = Modifier.width(270.dp),
-            value = "",
+            value = uiState.password,
             label = { Text(stringResource(R.string.password)) },
-            onValueChange = {},
+            onValueChange = {
+                viewModel.changeLoginPassword(it)
+            },
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             contentPadding = PaddingValues(0.dp),
             onClick = {
-                navigateToHome()
+                viewModel.emailPasswordLogin()
             },
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -101,8 +110,8 @@ fun LoginSection(
             Text(
                 stringResource(R.string.login),
                 modifier = Modifier.padding(
-                    top = 0.dp,
-                    bottom = 0.dp,
+                    top = 4.dp,
+                    bottom = 4.dp,
                     start = 16.dp,
                     end = 16.dp
                 ),
@@ -160,7 +169,7 @@ fun SocialLoginSection() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(
-            contentPadding = PaddingValues(12.dp),
+            contentPadding = PaddingValues(0.dp),
             onClick = { /*TODO*/ },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Red,
@@ -178,13 +187,17 @@ fun SocialLoginSection() {
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
             Text(
                 stringResource(R.string.continue_with_google),
+                modifier = Modifier.padding(
+                    top = 8.dp,
+                    bottom = 8.dp
+                ),
                 style = MaterialTheme.typography.body1,
                 fontWeight = FontWeight.Bold
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedButton(
-            contentPadding = PaddingValues(12.dp),
+            contentPadding = PaddingValues(0.dp),
             onClick = { /*TODO*/ },
             colors = ButtonDefaults.buttonColors(
                 contentColor = Color.Black,
@@ -204,6 +217,10 @@ fun SocialLoginSection() {
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
             Text(
                 stringResource(R.string.continue_anonymously),
+                modifier = Modifier.padding(
+                    top = 8.dp,
+                    bottom = 8.dp
+                ),
                 style = MaterialTheme.typography.body1,
                 fontWeight = FontWeight.Bold
             )

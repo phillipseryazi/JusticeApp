@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.mudhut.software.justiceapp.authentication.views.LoginScreen
+import com.mudhut.software.justiceapp.authentication.views.RegistrationScreen
 import com.mudhut.software.justiceapp.onboarding.views.OnBoardingScreen
 
 @ExperimentalPagerApi
@@ -20,8 +21,7 @@ fun NavigationComposable() {
                 OnBoardingScreen(
                     navigateToLogin = {
                         navController.navigate(Destination.LoginScreen.route)
-                    }
-                )
+                    })
             }
 
             composable(Destination.LoginScreen.route) {
@@ -35,7 +35,7 @@ fun NavigationComposable() {
             }
 
             composable(Destination.RegistrationScreen.route) {
-
+                RegistrationScreen()
             }
         }
     )
