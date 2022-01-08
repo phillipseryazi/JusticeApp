@@ -5,9 +5,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.mudhut.software.justiceapp.authentication.views.LoginScreen
-import com.mudhut.software.justiceapp.authentication.views.RegistrationScreen
-import com.mudhut.software.justiceapp.onboarding.views.OnBoardingScreen
+import com.mudhut.software.justiceapp.ui.authentication.views.LoginScreen
+import com.mudhut.software.justiceapp.ui.authentication.views.RegistrationScreen
+import com.mudhut.software.justiceapp.ui.onboarding.views.OnBoardingScreen
 
 @ExperimentalPagerApi
 @Composable

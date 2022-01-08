@@ -6,9 +6,7 @@ buildscript {
         compose_navigation = '2.4.0-rc01'
         dagger_hilt = '2.38.1'
         google_services = '4.3.10'
-        firebase_auth = '19.2.0'
-        firebase_firestore = '21.4.0'
-        firebase_storage = '19.1.1'
+        kotlin_play_services = '1.3.5'
     }
     repositories {
         google()

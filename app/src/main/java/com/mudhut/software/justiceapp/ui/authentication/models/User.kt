@@ -1,4 +1,4 @@
-package com.mudhut.software.justiceapp.authentication.models
+package com.mudhut.software.justiceapp.ui.authentication.models
 
 data class User(
     val alias: String,

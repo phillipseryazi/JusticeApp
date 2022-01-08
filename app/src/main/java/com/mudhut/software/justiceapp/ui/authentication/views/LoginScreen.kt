@@ -1,4 +1,4 @@
-package com.mudhut.software.justiceapp.authentication.views
+package com.mudhut.software.justiceapp.ui.authentication.views
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mudhut.software.justiceapp.R
-import com.mudhut.software.justiceapp.authentication.viewmodels.AuthUiState
-import com.mudhut.software.justiceapp.authentication.viewmodels.AuthenticationViewModel
+import com.mudhut.software.justiceapp.ui.authentication.viewmodels.AuthUiState
+import com.mudhut.software.justiceapp.ui.authentication.viewmodels.AuthenticationViewModel
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 
 @Composable

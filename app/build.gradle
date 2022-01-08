@@ -87,7 +87,11 @@ dependencies {
     // Firebase
     implementation platform('com.google.firebase:firebase-bom:29.0.3')
     implementation 'com.google.firebase:firebase-analytics-ktx'
-    implementation "com.google.firebase:firebase-auth:$firebase_auth"
-    implementation "com.google.firebase:firebase-firestore:$firebase_firestore"
-    implementation "com.google.firebase:firebase-storage:$firebase_storage"
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.firebase:firebase-storage'
+
+
+    // Kotlin play services
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$kotlin_play_services"
 }

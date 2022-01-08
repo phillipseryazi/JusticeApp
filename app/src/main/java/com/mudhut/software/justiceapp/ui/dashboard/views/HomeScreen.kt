@@ -1,4 +1,4 @@
-package com.mudhut.software.justiceapp.dashboard.views
+package com.mudhut.software.justiceapp.ui.dashboard.views
 
 import androidx.compose.runtime.Composable
 

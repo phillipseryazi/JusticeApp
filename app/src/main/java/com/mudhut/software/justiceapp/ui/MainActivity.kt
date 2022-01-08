@@ -1,4 +1,4 @@
-package com.mudhut.software.justiceapp
+package com.mudhut.software.justiceapp.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

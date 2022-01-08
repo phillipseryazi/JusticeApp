@@ -1,4 +1,4 @@
-package com.mudhut.software.justiceapp.authentication.views
+package com.mudhut.software.justiceapp.ui.authentication.views
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.toggleable
@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.flowlayout.FlowRow
 import com.mudhut.software.justiceapp.R
-import com.mudhut.software.justiceapp.authentication.viewmodels.AuthUiState
-import com.mudhut.software.justiceapp.authentication.viewmodels.AuthenticationViewModel
+import com.mudhut.software.justiceapp.ui.authentication.viewmodels.AuthUiState
+import com.mudhut.software.justiceapp.ui.authentication.viewmodels.AuthenticationViewModel
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 import com.mudhut.software.justiceapp.utils.UserType
 import com.mudhut.software.justiceapp.utils.getUserTypes
@@ -96,7 +96,9 @@ fun RegistrationSection(
             value = uiState.username,
             label = { Text(stringResource(R.string.username)) },
             onValueChange = onUsernameChange,
+            isError = uiState.error != null
         )
+        uiState.error?.let { ErrorBanner(string = it) }
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
             modifier = Modifier.width(270.dp),
@@ -204,6 +206,11 @@ fun RegistrationButton(onUserRegistration: () -> Unit) {
             )
         }
     }
+}
+
+@Composable
+fun ErrorBanner(string: String) {
+    Text(string, color = MaterialTheme.colors.error, fontSize = 12.sp)
 }
 
 @Preview
