@@ -84,6 +84,9 @@ dependencies {
     implementation "com.google.dagger:hilt-android:$dagger_hilt"
     kapt "com.google.dagger:hilt-compiler:$dagger_hilt"
 
+    // Hilt Navigation
+    implementation "androidx.hilt:hilt-navigation-compose:$hilt_navigation"
+
     // Firebase
     implementation platform('com.google.firebase:firebase-bom:29.0.3')
     implementation 'com.google.firebase:firebase-analytics-ktx'

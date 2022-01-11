@@ -5,32 +5,40 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.flowlayout.FlowRow
 import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.ui.authentication.viewmodels.AuthUiState
-import com.mudhut.software.justiceapp.ui.authentication.viewmodels.AuthenticationViewModel
+import com.mudhut.software.justiceapp.ui.authentication.viewmodels.FocusedTextField
+import com.mudhut.software.justiceapp.ui.common.ErrorBanner
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 import com.mudhut.software.justiceapp.utils.UserType
 import com.mudhut.software.justiceapp.utils.getUserTypes
 
 @Composable
 fun RegistrationScreen(
-    viewModel: AuthenticationViewModel = viewModel()
+    navigateToHome: (String) -> Unit,
+    onUsernameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onContactChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onUserTypeChange: (UserType) -> Unit,
+    onFocusedTextField: (FocusedTextField) -> Unit,
+    onRegistrationPressed: () -> Unit,
+    uiState: AuthUiState.RegistrationUiState
 ) {
     val scaffoldState = rememberScaffoldState()
-    val uiState by viewModel.registrationUiState
 
     Scaffold(
         modifier = Modifier.fillMaxWidth(),
@@ -44,24 +52,13 @@ fun RegistrationScreen(
             RegistrationTitleSection()
             Spacer(modifier = Modifier.height(24.dp))
             RegistrationSection(
-                onUsernameChange = {
-                    viewModel.changeRegistrationUsername(it)
-                },
-                onEmailChange = {
-                    viewModel.changeRegistrationEmail(it)
-                },
-                onContactChange = {
-                    viewModel.changeRegistrationContact(it)
-                },
-                onPasswordChange = {
-                    viewModel.changeRegistrationPassword(it)
-                },
-                onUserTypeChange = {
-                    viewModel.changeUserType(it)
-                },
-                onUserRegistration = {
-                    viewModel.registerUser()
-                },
+                onUsernameChange = onUsernameChange,
+                onEmailChange = onEmailChange,
+                onContactChange = onContactChange,
+                onPasswordChange = onPasswordChange,
+                onUserTypeChange = onUserTypeChange,
+                onRegistrationPressed = onRegistrationPressed,
+                onFocusedTextField = onFocusedTextField,
                 uiState = uiState
             )
         }
@@ -87,38 +84,68 @@ fun RegistrationSection(
     onContactChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onUserTypeChange: (UserType) -> Unit,
-    onUserRegistration: () -> Unit,
+    onRegistrationPressed: () -> Unit,
+    onFocusedTextField: (FocusedTextField) -> Unit,
     uiState: AuthUiState.RegistrationUiState
 ) {
+    val focusManager = LocalFocusManager.current
+
     Column(modifier = Modifier.width(270.dp)) {
-        TextField(
-            modifier = Modifier.width(270.dp),
+        RegistrationTextField(
+            modifier = Modifier
+                .width(270.dp)
+                .onFocusChanged { focusState ->
+                    if (focusState.isFocused) {
+                        onFocusedTextField(FocusedTextField.USERNAME)
+                    }
+                },
             value = uiState.username,
-            label = { Text(stringResource(R.string.username)) },
-            onValueChange = onUsernameChange,
-            isError = uiState.error != null
+            label = stringResource(R.string.username),
+            uiState = uiState,
+            onInputChange = onUsernameChange
         )
-        uiState.error?.let { ErrorBanner(string = it) }
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
-            modifier = Modifier.width(270.dp),
+        RegistrationTextField(
+            modifier = Modifier
+                .width(270.dp)
+                .width(270.dp)
+                .onFocusChanged { focusState ->
+                    if (focusState.isFocused) {
+                        onFocusedTextField(FocusedTextField.EMAIL)
+                    }
+                },
             value = uiState.email,
-            label = { Text(stringResource(R.string.email)) },
-            onValueChange = onEmailChange,
+            label = stringResource(R.string.email),
+            uiState = uiState,
+            onInputChange = onEmailChange
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
-            modifier = Modifier.width(270.dp),
+        RegistrationTextField(
+            modifier = Modifier
+                .width(270.dp)
+                .onFocusChanged { focusState ->
+                    if (focusState.isFocused) {
+                        onFocusedTextField(FocusedTextField.CONTACT)
+                    }
+                },
             value = uiState.contact,
-            label = { Text(stringResource(R.string.contact)) },
-            onValueChange = onContactChange,
+            label = stringResource(R.string.contact),
+            uiState = uiState,
+            onInputChange = onContactChange
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
-            modifier = Modifier.width(270.dp),
+        RegistrationTextField(
+            modifier = Modifier
+                .width(270.dp)
+                .onFocusChanged { focusState ->
+                    if (focusState.isFocused) {
+                        onFocusedTextField(FocusedTextField.PASSWORD)
+                    }
+                },
             value = uiState.password,
-            label = { Text(stringResource(R.string.password)) },
-            onValueChange = onPasswordChange,
+            label = stringResource(R.string.password),
+            uiState = uiState,
+            onInputChange = onPasswordChange
         )
         Spacer(modifier = Modifier.height(16.dp))
         UserTypeChipGroup(
@@ -126,7 +153,35 @@ fun RegistrationSection(
             onSelectionChange = onUserTypeChange
         )
         Spacer(modifier = Modifier.height(16.dp))
-        RegistrationButton(onUserRegistration)
+        RegistrationButton(onRegistrationPressed)
+    }
+}
+
+@Composable
+fun RegistrationTextField(
+    modifier: Modifier,
+    value: String,
+    label: String,
+    uiState: AuthUiState.RegistrationUiState,
+    onInputChange: (String) -> Unit
+) {
+    Column {
+        TextField(
+            modifier = modifier,
+            value = value,
+            label = { Text(label) },
+            onValueChange = onInputChange,
+            isError = if (uiState.focusedTextField?.value == label) {
+                uiState.validationError != null
+            } else {
+                false
+            }
+        )
+        uiState.validationError?.let {
+            if (uiState.focusedTextField?.value == label) {
+                ErrorBanner(string = it)
+            }
+        }
     }
 }
 
@@ -182,14 +237,14 @@ fun UserTypeChipGroup(
 }
 
 @Composable
-fun RegistrationButton(onUserRegistration: () -> Unit) {
+fun RegistrationButton(onRegistrationPressed: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
     ) {
         Button(
             contentPadding = PaddingValues(0.dp),
-            onClick = onUserRegistration,
+            onClick = onRegistrationPressed,
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
         ) {
@@ -208,15 +263,21 @@ fun RegistrationButton(onUserRegistration: () -> Unit) {
     }
 }
 
-@Composable
-fun ErrorBanner(string: String) {
-    Text(string, color = MaterialTheme.colors.error, fontSize = 12.sp)
-}
 
 @Preview
 @Composable
 fun RegistrationScreenPreview() {
     JusticeAppTheme {
-        RegistrationScreen(viewModel = AuthenticationViewModel())
+        RegistrationScreen(
+            navigateToHome = {},
+            onUsernameChange = {},
+            onEmailChange = {},
+            onContactChange = {},
+            onPasswordChange = {},
+            onUserTypeChange = {},
+            onFocusedTextField = {},
+            onRegistrationPressed = {},
+            uiState = AuthUiState.RegistrationUiState()
+        )
     }
 }

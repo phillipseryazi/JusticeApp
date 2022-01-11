@@ -3,6 +3,7 @@ package com.mudhut.software.justiceapp.di
 import com.google.firebase.auth.FirebaseAuth
 import com.mudhut.software.justiceapp.data.NetworkDataSource
 import com.mudhut.software.justiceapp.domain.repositories.auth.AuthenticationRepository
+import com.mudhut.software.justiceapp.domain.repositories.auth.IAuthenticationRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,6 +25,6 @@ object AppModule {
     @Singleton
     @Provides
     fun providesAuthenticationRepository(networkDataSource: NetworkDataSource) =
-        AuthenticationRepository(networkDataSource)
+        AuthenticationRepository(networkDataSource) as IAuthenticationRepository
 
 }

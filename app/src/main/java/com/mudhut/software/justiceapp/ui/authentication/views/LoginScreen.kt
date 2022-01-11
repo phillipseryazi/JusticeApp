@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -18,20 +18,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.ui.authentication.viewmodels.AuthUiState
-import com.mudhut.software.justiceapp.ui.authentication.viewmodels.AuthenticationViewModel
+import com.mudhut.software.justiceapp.ui.authentication.viewmodels.FocusedTextField
+import com.mudhut.software.justiceapp.ui.common.ErrorBanner
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 
 @Composable
 fun LoginScreen(
     navigateToRegistration: () -> Unit,
     navigateToHome: () -> Unit,
-    viewModel: AuthenticationViewModel = viewModel()
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onLoginPressed: () -> Unit,
+    onFocusedTextField: (FocusedTextField) -> Unit,
+    uiState: AuthUiState.LoginUiState
 ) {
     val scaffoldState = rememberScaffoldState()
-    val uiState by viewModel.loginUiState
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -46,7 +50,10 @@ fun LoginScreen(
             LoginSection(
                 navigateToHome,
                 navigateToRegistration,
-                viewModel = viewModel,
+                onEmailChange = onEmailChange,
+                onPasswordChange = onPasswordChange,
+                onLoginPressed = onLoginPressed,
+                onFocusedTextField = onFocusedTextField,
                 uiState
             )
             Spacer(modifier = Modifier.height(24.dp))
@@ -73,36 +80,47 @@ fun LoginTitleSection() {
 fun LoginSection(
     navigateToHome: () -> Unit,
     navigateToRegistration: () -> Unit,
-    viewModel: AuthenticationViewModel,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onLoginPressed: () -> Unit,
+    onFocusedTextField: (FocusedTextField) -> Unit,
     uiState: AuthUiState.LoginUiState
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedTextField(
-            modifier = Modifier.width(270.dp),
+        LoginTextField(
+            modifier = Modifier
+                .width(270.dp)
+                .onFocusChanged { focusState ->
+                    if (focusState.isFocused) {
+                        onFocusedTextField(FocusedTextField.EMAIL)
+                    }
+                },
             value = uiState.email,
-            label = { Text(stringResource(R.string.email)) },
-            onValueChange = {
-                viewModel.changeLoginEmail(it)
-            },
+            label = stringResource(R.string.email),
+            uiState = uiState,
+            onInputChange = onEmailChange
         )
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            modifier = Modifier.width(270.dp),
+        LoginTextField(
+            modifier = Modifier
+                .width(270.dp)
+                .onFocusChanged { focusState ->
+                    if (focusState.isFocused) {
+                        onFocusedTextField(FocusedTextField.PASSWORD)
+                    }
+                },
             value = uiState.password,
-            label = { Text(stringResource(R.string.password)) },
-            onValueChange = {
-                viewModel.changeLoginPassword(it)
-            },
+            label = stringResource(R.string.password),
+            uiState = uiState,
+            onInputChange = onPasswordChange
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             contentPadding = PaddingValues(0.dp),
-            onClick = {
-                viewModel.emailPasswordLogin()
-            },
+            onClick = onLoginPressed,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .clip(RoundedCornerShape(8.dp))
@@ -131,6 +149,31 @@ fun LoginSection(
         )
     }
 }
+
+@Composable
+fun LoginTextField(
+    modifier: Modifier,
+    value: String,
+    label: String,
+    uiState: AuthUiState.LoginUiState,
+    onInputChange: (String) -> Unit
+) {
+    Column {
+        TextField(
+            modifier = modifier,
+            value = value,
+            label = { Text(label) },
+            onValueChange = onInputChange,
+            isError = false
+        )
+        uiState.validationError?.let {
+            if (uiState.focusedTextField?.value == label) {
+                ErrorBanner(string = it)
+            }
+        }
+    }
+}
+
 
 @Composable
 fun OrSection() {
@@ -235,7 +278,11 @@ fun LoginScreenPreview() {
         LoginScreen(
             navigateToRegistration = {},
             navigateToHome = {},
-            viewModel = AuthenticationViewModel()
+            onEmailChange = {},
+            onPasswordChange = {},
+            onLoginPressed = {},
+            onFocusedTextField = {},
+            uiState = AuthUiState.LoginUiState()
         )
     }
 }

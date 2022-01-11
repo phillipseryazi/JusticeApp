@@ -8,8 +8,10 @@ import androidx.compose.material.Surface
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.mudhut.software.justiceapp.navigation.NavigationComposable
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
+import dagger.hilt.android.AndroidEntryPoint
 
 @ExperimentalPagerApi
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
