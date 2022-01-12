@@ -17,19 +17,19 @@ import javax.inject.Inject
 sealed interface AuthUiState {
     var email: String
     var password: String
-    var loading: Boolean
+    var isLoading: Boolean
     var isAuthorised: Boolean
-    var validationError: String?
-    var toastError: String?
+    var hasError: Boolean
+    var error: FormError?
     var focusedTextField: FocusedTextField?
 
     data class RegistrationUiState(
         override var email: String = "",
         override var password: String = "",
-        override var loading: Boolean = false,
+        override var isLoading: Boolean = false,
         override var isAuthorised: Boolean = false,
-        override var validationError: String? = null,
-        override var toastError: String? = null,
+        override var hasError: Boolean = false,
+        override var error: FormError? = null,
         override var focusedTextField: FocusedTextField? = null,
         var username: String = "",
         var contact: String = "",
@@ -39,19 +39,29 @@ sealed interface AuthUiState {
     data class LoginUiState(
         override var email: String = "",
         override var password: String = "",
-        override var loading: Boolean = false,
+        override var isLoading: Boolean = false,
         override var isAuthorised: Boolean = false,
-        override var validationError: String? = null,
-        override var toastError: String? = null,
+        override var hasError: Boolean = false,
+        override var error: FormError? = null,
         override var focusedTextField: FocusedTextField? = null,
     ) : AuthUiState
 }
+
+data class FormError(
+    val message: String,
+    val type: FormErrorType
+)
 
 enum class FocusedTextField(val value: String) {
     USERNAME("Username"),
     EMAIL("Email"),
     CONTACT("Contact"),
     PASSWORD("Password")
+}
+
+enum class FormErrorType(val value: String) {
+    VALIDATION("Validation"),
+    TOAST("Toast")
 }
 
 @HiltViewModel
@@ -71,7 +81,15 @@ class AuthenticationViewModel @Inject constructor(
         uiError = InputValidator.TextFieldValidator.validate(username, null)
         registrationUiState.value = registrationUiState.value.copy(
             username = username,
-            validationError = uiError
+            hasError = uiError != null,
+            error = if (uiError != null) {
+                createError(
+                    message = uiError ?: "Unknown error",
+                    type = FormErrorType.VALIDATION
+                )
+            } else {
+                null
+            }
         )
     }
 
@@ -79,7 +97,15 @@ class AuthenticationViewModel @Inject constructor(
         uiError = InputValidator.EmailValidator.validate(email, null)
         registrationUiState.value = registrationUiState.value.copy(
             email = email,
-            validationError = uiError
+            hasError = uiError != null,
+            error = if (uiError != null) {
+                createError(
+                    message = uiError ?: "Unknown error",
+                    type = FormErrorType.VALIDATION
+                )
+            } else {
+                null
+            }
         )
     }
 
@@ -87,7 +113,15 @@ class AuthenticationViewModel @Inject constructor(
         uiError = InputValidator.TextFieldValidator.validate(contact, null)
         registrationUiState.value = registrationUiState.value.copy(
             contact = contact,
-            validationError = uiError
+            hasError = uiError != null,
+            error = if (uiError != null) {
+                createError(
+                    message = uiError ?: "Unknown error",
+                    type = FormErrorType.VALIDATION
+                )
+            } else {
+                null
+            }
         )
     }
 
@@ -95,7 +129,15 @@ class AuthenticationViewModel @Inject constructor(
         uiError = InputValidator.PasswordValidator.validate(password, 7)
         registrationUiState.value = registrationUiState.value.copy(
             password = password,
-            validationError = uiError
+            hasError = uiError != null,
+            error = if (uiError != null) {
+                createError(
+                    message = uiError ?: "Unknown error",
+                    type = FormErrorType.VALIDATION
+                )
+            } else {
+                null
+            }
         )
     }
 
@@ -109,7 +151,15 @@ class AuthenticationViewModel @Inject constructor(
         uiError = InputValidator.EmailValidator.validate(email, null)
         loginUiState.value = loginUiState.value.copy(
             email = email,
-            validationError = uiError
+            hasError = uiError != null,
+            error = if (uiError != null) {
+                createError(
+                    message = uiError ?: "Unknown error",
+                    type = FormErrorType.VALIDATION
+                )
+            } else {
+                null
+            }
         )
     }
 
@@ -117,7 +167,15 @@ class AuthenticationViewModel @Inject constructor(
         uiError = InputValidator.PasswordValidator.validate(password, 7)
         loginUiState.value = loginUiState.value.copy(
             password = password,
-            validationError = uiError
+            hasError = uiError != null,
+            error = if (uiError != null) {
+                createError(
+                    message = uiError ?: "Unknown error",
+                    type = FormErrorType.VALIDATION
+                )
+            } else {
+                null
+            }
         )
     }
 
@@ -133,10 +191,30 @@ class AuthenticationViewModel @Inject constructor(
         )
     }
 
+    private fun createError(message: String, type: FormErrorType): FormError {
+        return FormError(message, type)
+    }
+
+    fun resetErrorLogin() {
+        loginUiState.value = loginUiState.value.copy(
+            hasError = false
+        )
+    }
+
+    fun resetErrorRegistration() {
+        registrationUiState.value = registrationUiState.value.copy(
+            hasError = false
+        )
+    }
+
     fun emailPasswordLogin() {
         if (loginUiState.value.email.isEmpty() || loginUiState.value.password.isEmpty()) {
             loginUiState.value = loginUiState.value.copy(
-                toastError = "Please provide all required information"
+                hasError = true,
+                error = createError(
+                    message = "Please provide all required information",
+                    type = FormErrorType.TOAST
+                )
             )
         } else {
             viewModelScope.launch(Dispatchers.IO) {
@@ -147,19 +225,23 @@ class AuthenticationViewModel @Inject constructor(
                     when (it) {
                         is Resource.Loading -> {
                             loginUiState.value = loginUiState.value.copy(
-                                loading = true
+                                isLoading = true
                             )
                         }
                         is Resource.Success -> {
                             loginUiState.value = loginUiState.value.copy(
-                                loading = it.data ?: false,
+                                isLoading = it.data ?: false,
                                 isAuthorised = true
                             )
                         }
                         is Resource.Error -> {
                             loginUiState.value = loginUiState.value.copy(
-                                loading = it.data ?: false,
-                                toastError = it.message
+                                isLoading = it.data ?: false,
+                                hasError = true,
+                                error = createError(
+                                    message = it.message ?: "Unknown error",
+                                    type = FormErrorType.TOAST
+                                )
                             )
                         }
                     }
@@ -172,7 +254,11 @@ class AuthenticationViewModel @Inject constructor(
         val user = registrationUiState.value
         if (user.username.isEmpty() || user.email.isEmpty() || user.contact.isEmpty() || user.password.isEmpty() || user.userType == null) {
             registrationUiState.value = registrationUiState.value.copy(
-                toastError = "Please provide all required information"
+                hasError = true,
+                error = createError(
+                    message = "Please provide all required information",
+                    type = FormErrorType.TOAST
+                )
             )
         } else {
             viewModelScope.launch(Dispatchers.IO) {
@@ -183,19 +269,22 @@ class AuthenticationViewModel @Inject constructor(
                     when (it) {
                         is Resource.Loading -> {
                             registrationUiState.value = registrationUiState.value.copy(
-                                loading = true
+                                isLoading = true
                             )
                         }
                         is Resource.Success -> {
                             loginUiState.value = loginUiState.value.copy(
-                                loading = it.data ?: false,
+                                isLoading = it.data ?: false,
                                 isAuthorised = true
                             )
                         }
                         is Resource.Error -> {
                             registrationUiState.value = registrationUiState.value.copy(
-                                loading = it.data ?: false,
-                                toastError = it.message
+                                isLoading = it.data ?: false,
+                                error = createError(
+                                    message = it.message ?: "Unknown error",
+                                    type = FormErrorType.TOAST
+                                )
                             )
                         }
                     }

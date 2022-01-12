@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,7 +22,9 @@ import androidx.compose.ui.unit.sp
 import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.ui.authentication.viewmodels.AuthUiState
 import com.mudhut.software.justiceapp.ui.authentication.viewmodels.FocusedTextField
+import com.mudhut.software.justiceapp.ui.authentication.viewmodels.FormErrorType
 import com.mudhut.software.justiceapp.ui.common.ErrorBanner
+import com.mudhut.software.justiceapp.ui.common.LoadingPage
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 
 @Composable
@@ -32,34 +35,56 @@ fun LoginScreen(
     onPasswordChange: (String) -> Unit,
     onLoginPressed: () -> Unit,
     onFocusedTextField: (FocusedTextField) -> Unit,
+    resetError: () -> Unit,
     uiState: AuthUiState.LoginUiState
 ) {
     val scaffoldState = rememberScaffoldState()
 
+    if (uiState.hasError) {
+        uiState.error?.let {
+            if (it.type == FormErrorType.TOAST) {
+                LaunchedEffect(scaffoldState.snackbarHostState) {
+                    scaffoldState.snackbarHostState.showSnackbar(
+                        message = uiState.error!!.message,
+                        duration = SnackbarDuration.Short
+                    )
+                    resetError()
+                }
+            }
+        }
+    }
+
+    uiState.error?.let {
+
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         scaffoldState = scaffoldState
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Spacer(modifier = Modifier.height(32.dp))
-            LoginTitleSection()
-            Spacer(modifier = Modifier.height(24.dp))
-            LoginSection(
-                navigateToHome,
-                navigateToRegistration,
-                onEmailChange = onEmailChange,
-                onPasswordChange = onPasswordChange,
-                onLoginPressed = onLoginPressed,
-                onFocusedTextField = onFocusedTextField,
-                uiState
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            OrSection()
-            Spacer(modifier = Modifier.height(24.dp))
-            SocialLoginSection()
+        if (uiState.isLoading) {
+            LoadingPage()
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Spacer(modifier = Modifier.height(32.dp))
+                LoginTitleSection()
+                Spacer(modifier = Modifier.height(24.dp))
+                LoginSection(
+                    navigateToHome,
+                    navigateToRegistration,
+                    onEmailChange = onEmailChange,
+                    onPasswordChange = onPasswordChange,
+                    onLoginPressed = onLoginPressed,
+                    onFocusedTextField = onFocusedTextField,
+                    uiState
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                OrSection()
+                Spacer(modifier = Modifier.height(24.dp))
+                SocialLoginSection()
+            }
         }
     }
 }
@@ -164,11 +189,15 @@ fun LoginTextField(
             value = value,
             label = { Text(label) },
             onValueChange = onInputChange,
-            isError = false
+            isError = if (uiState.focusedTextField?.value == label) {
+                uiState.hasError
+            } else {
+                false
+            }
         )
-        uiState.validationError?.let {
-            if (uiState.focusedTextField?.value == label) {
-                ErrorBanner(string = it)
+        uiState.error?.let {
+            if (it.type == FormErrorType.VALIDATION && uiState.focusedTextField?.value == label) {
+                ErrorBanner(string = it.message)
             }
         }
     }
@@ -282,6 +311,7 @@ fun LoginScreenPreview() {
             onPasswordChange = {},
             onLoginPressed = {},
             onFocusedTextField = {},
+            resetError = {},
             uiState = AuthUiState.LoginUiState()
         )
     }

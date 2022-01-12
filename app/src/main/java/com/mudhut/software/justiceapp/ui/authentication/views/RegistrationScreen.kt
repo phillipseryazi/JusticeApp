@@ -5,6 +5,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,7 +22,9 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.ui.authentication.viewmodels.AuthUiState
 import com.mudhut.software.justiceapp.ui.authentication.viewmodels.FocusedTextField
+import com.mudhut.software.justiceapp.ui.authentication.viewmodels.FormErrorType
 import com.mudhut.software.justiceapp.ui.common.ErrorBanner
+import com.mudhut.software.justiceapp.ui.common.LoadingPage
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 import com.mudhut.software.justiceapp.utils.UserType
 import com.mudhut.software.justiceapp.utils.getUserTypes
@@ -36,31 +39,50 @@ fun RegistrationScreen(
     onUserTypeChange: (UserType) -> Unit,
     onFocusedTextField: (FocusedTextField) -> Unit,
     onRegistrationPressed: () -> Unit,
+    resetError: () -> Unit,
     uiState: AuthUiState.RegistrationUiState
 ) {
     val scaffoldState = rememberScaffoldState()
+
+    if (uiState.hasError) {
+        uiState.error?.let {
+            if (it.type == FormErrorType.TOAST) {
+                LaunchedEffect(scaffoldState.snackbarHostState) {
+                    scaffoldState.snackbarHostState.showSnackbar(
+                        message = uiState.error!!.message,
+                        duration = SnackbarDuration.Short
+                    )
+                    resetError()
+                }
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxWidth(),
         scaffoldState = scaffoldState,
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(32.dp))
-            RegistrationTitleSection()
-            Spacer(modifier = Modifier.height(24.dp))
-            RegistrationSection(
-                onUsernameChange = onUsernameChange,
-                onEmailChange = onEmailChange,
-                onContactChange = onContactChange,
-                onPasswordChange = onPasswordChange,
-                onUserTypeChange = onUserTypeChange,
-                onRegistrationPressed = onRegistrationPressed,
-                onFocusedTextField = onFocusedTextField,
-                uiState = uiState
-            )
+        if (uiState.isLoading) {
+            LoadingPage()
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(32.dp))
+                RegistrationTitleSection()
+                Spacer(modifier = Modifier.height(24.dp))
+                RegistrationSection(
+                    onUsernameChange = onUsernameChange,
+                    onEmailChange = onEmailChange,
+                    onContactChange = onContactChange,
+                    onPasswordChange = onPasswordChange,
+                    onUserTypeChange = onUserTypeChange,
+                    onRegistrationPressed = onRegistrationPressed,
+                    onFocusedTextField = onFocusedTextField,
+                    uiState = uiState
+                )
+            }
         }
     }
 }
@@ -172,14 +194,14 @@ fun RegistrationTextField(
             label = { Text(label) },
             onValueChange = onInputChange,
             isError = if (uiState.focusedTextField?.value == label) {
-                uiState.validationError != null
+                uiState.hasError
             } else {
                 false
             }
         )
-        uiState.validationError?.let {
-            if (uiState.focusedTextField?.value == label) {
-                ErrorBanner(string = it)
+        uiState.error?.let {
+            if (it.type == FormErrorType.VALIDATION && uiState.focusedTextField?.value == label) {
+                ErrorBanner(string = it.message)
             }
         }
     }
@@ -277,6 +299,7 @@ fun RegistrationScreenPreview() {
             onUserTypeChange = {},
             onFocusedTextField = {},
             onRegistrationPressed = {},
+            resetError = {},
             uiState = AuthUiState.RegistrationUiState()
         )
     }

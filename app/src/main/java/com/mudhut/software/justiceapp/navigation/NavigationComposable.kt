@@ -48,6 +48,9 @@ fun NavigationComposable() {
                     onFocusedTextField = {
                         viewModel.setLoginFocusedTextField(it)
                     },
+                    resetError = {
+                        viewModel.resetErrorLogin()
+                    },
                     uiState = viewModel.loginUiState.collectAsState().value
                 )
             }
@@ -78,6 +81,9 @@ fun NavigationComposable() {
                     },
                     onRegistrationPressed = {
                         viewModel.emailPasswordRegistration()
+                    },
+                    resetError = {
+                        viewModel.resetErrorRegistration()
                     },
                     uiState = viewModel.registrationUiState.collectAsState().value
                 )
