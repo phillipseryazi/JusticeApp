@@ -1,4 +1,4 @@
-package com.mudhut.software.justiceapp.onboarding.views
+package com.mudhut.software.justiceapp.ui.onboarding.views
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -17,13 +17,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.*
 import com.mudhut.software.justiceapp.R
-import com.mudhut.software.justiceapp.onboarding.models.OnBoardingStep
-import com.mudhut.software.justiceapp.onboarding.models.getOnBoardingSteps
+import com.mudhut.software.justiceapp.ui.onboarding.models.OnBoardingStep
+import com.mudhut.software.justiceapp.ui.onboarding.models.getOnBoardingSteps
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 
 @ExperimentalPagerApi
 @Composable
 fun OnBoardingScreen(
+    navigateToLogin: () -> Unit
 ) {
     val context = LocalContext.current
     val steps = getOnBoardingSteps(context = context)
@@ -55,7 +56,9 @@ fun OnBoardingScreen(
                         colors = ButtonDefaults.buttonColors(
                             contentColor = Color.White
                         ),
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            navigateToLogin()
+                        },
                         modifier = Modifier
                             .size(width = 140.dp, height = 50.dp)
                             .align(Alignment.CenterHorizontally)
@@ -138,6 +141,6 @@ fun OnBoardingPageIndicator(state: PagerState) {
 @Composable
 fun OnBoardingScreenPreview() {
     JusticeAppTheme {
-        OnBoardingScreen()
+        OnBoardingScreen(navigateToLogin = {})
     }
 }

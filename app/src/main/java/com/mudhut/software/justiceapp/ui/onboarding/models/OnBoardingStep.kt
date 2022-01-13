@@ -1,4 +1,4 @@
-package com.mudhut.software.justiceapp.onboarding.models
+package com.mudhut.software.justiceapp.ui.onboarding.models
 
 import android.content.Context
 import com.mudhut.software.justiceapp.R

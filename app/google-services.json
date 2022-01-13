@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "641786828134",
+    "project_id": "justiceapp-ffd99",
+    "storage_bucket": "justiceapp-ffd99.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:641786828134:android:4fe5467655c5d9735a64a7",
+        "android_client_info": {
+          "package_name": "com.mudhut.software.justiceapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "641786828134-5gjit6jcrvglv0p1cgdsuqiq3la3p9jp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mudhut.software.justiceapp",
+            "certificate_hash": "666c900ad81e24e1fb1ba6385afcd20388631f31"
+          }
+        },
+        {
+          "client_id": "641786828134-kr1frp8qp4loslv0o0mcqmmd74gtda3a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAwOlTWZbN6lDBrkO7LSHNuexEa6Y3pDvU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "641786828134-kr1frp8qp4loslv0o0mcqmmd74gtda3a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
