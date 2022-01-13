@@ -8,4 +8,5 @@ interface IAuthenticationRepository {
     fun emailPasswordLogin(email: String, password: String): Flow<Resource<Boolean>>
     fun googleLogin()
     fun anonymousLogin()
+    fun logout()
 }

@@ -1,9 +1,12 @@
 package com.mudhut.software.justiceapp.ui.authentication.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mudhut.software.justiceapp.data.datastore.ProfileDatastoreManager
 import com.mudhut.software.justiceapp.domain.usecases.auth.EmailPasswordLoginUseCase
 import com.mudhut.software.justiceapp.domain.usecases.auth.EmailPasswordRegistrationUseCase
+import com.mudhut.software.justiceapp.domain.usecases.profiles.CreateUserProfileUseCase
 import com.mudhut.software.justiceapp.utils.InputValidator
 import com.mudhut.software.justiceapp.utils.Resource
 import com.mudhut.software.justiceapp.utils.UserType
@@ -66,8 +69,10 @@ enum class FormErrorType(val value: String) {
 
 @HiltViewModel
 class AuthenticationViewModel @Inject constructor(
+    private val datastore: ProfileDatastoreManager,
     private val emailPasswordRegistrationUseCase: EmailPasswordRegistrationUseCase,
     private val emailPasswordLoginUseCase: EmailPasswordLoginUseCase,
+    private val createUserProfileUseCase: CreateUserProfileUseCase
 ) : ViewModel() {
     var uiError: String? = null
 
@@ -273,10 +278,11 @@ class AuthenticationViewModel @Inject constructor(
                             )
                         }
                         is Resource.Success -> {
-                            loginUiState.value = loginUiState.value.copy(
+                            registrationUiState.value = registrationUiState.value.copy(
                                 isLoading = it.data ?: false,
                                 isAuthorised = true
                             )
+                            createUserProfile()
                         }
                         is Resource.Error -> {
                             registrationUiState.value = registrationUiState.value.copy(
@@ -287,6 +293,34 @@ class AuthenticationViewModel @Inject constructor(
                                 )
                             )
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun createUserProfile() {
+        viewModelScope.launch(Dispatchers.IO) {
+            createUserProfileUseCase.invoke(
+                registrationUiState.value.username,
+                registrationUiState.value.email,
+                registrationUiState.value.contact,
+                registrationUiState.value.userType?.label ?: "",
+                ""
+            ).collect {
+                when (it) {
+                    is Resource.Loading -> {
+                        Log.i("UserProfile", "Creating user profile")
+                    }
+                    is Resource.Success -> {
+                        datastore.writeToDataStore("Username", it.data?.username ?: "")
+                        datastore.writeToDataStore("Email", it.data?.email ?: "")
+                        datastore.writeToDataStore("Contact", it.data?.contact ?: "")
+                        datastore.writeToDataStore("UserType", it.data?.userType ?: "")
+                        datastore.writeToDataStore("Avatar", it.data?.avatar ?: "")
+                    }
+                    is Resource.Error -> {
+                        Log.e("Profile", it.message ?: "Unknown error")
                     }
                 }
             }

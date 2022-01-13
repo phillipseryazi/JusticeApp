@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -31,7 +30,7 @@ import com.mudhut.software.justiceapp.utils.getUserTypes
 
 @Composable
 fun RegistrationScreen(
-    navigateToHome: (String) -> Unit,
+    navigateToHome: () -> Unit,
     onUsernameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onContactChange: (String) -> Unit,
@@ -55,6 +54,12 @@ fun RegistrationScreen(
                     resetError()
                 }
             }
+        }
+    }
+
+    if (uiState.isAuthorised) {
+        LaunchedEffect(uiState.isAuthorised) {
+            navigateToHome()
         }
     }
 
@@ -110,8 +115,6 @@ fun RegistrationSection(
     onFocusedTextField: (FocusedTextField) -> Unit,
     uiState: AuthUiState.RegistrationUiState
 ) {
-    val focusManager = LocalFocusManager.current
-
     Column(modifier = Modifier.width(270.dp)) {
         RegistrationTextField(
             modifier = Modifier

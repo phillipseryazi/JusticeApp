@@ -1,4 +1,4 @@
-package com.mudhut.software.justiceapp.di.auth
+package com.mudhut.software.justiceapp.di
 
 import com.mudhut.software.justiceapp.domain.repositories.auth.AuthenticationRepository
 import com.mudhut.software.justiceapp.domain.usecases.auth.EmailPasswordLoginUseCase

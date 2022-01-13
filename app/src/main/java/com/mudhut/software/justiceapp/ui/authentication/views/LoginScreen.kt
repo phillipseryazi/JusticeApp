@@ -54,8 +54,10 @@ fun LoginScreen(
         }
     }
 
-    uiState.error?.let {
-
+    if (uiState.isAuthorised) {
+        LaunchedEffect(uiState.isAuthorised) {
+            navigateToHome()
+        }
     }
 
     Scaffold(
