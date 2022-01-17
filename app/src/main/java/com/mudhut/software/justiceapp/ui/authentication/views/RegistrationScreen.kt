@@ -30,7 +30,7 @@ import com.mudhut.software.justiceapp.utils.getUserTypes
 
 @Composable
 fun RegistrationScreen(
-    navigateToHome: () -> Unit,
+    navigateToDashboard: () -> Unit,
     onUsernameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onContactChange: (String) -> Unit,
@@ -59,7 +59,7 @@ fun RegistrationScreen(
 
     if (uiState.isAuthorised) {
         LaunchedEffect(uiState.isAuthorised) {
-            navigateToHome()
+            navigateToDashboard()
         }
     }
 
@@ -294,7 +294,7 @@ fun RegistrationButton(onRegistrationPressed: () -> Unit) {
 fun RegistrationScreenPreview() {
     JusticeAppTheme {
         RegistrationScreen(
-            navigateToHome = {},
+            navigateToDashboard = {},
             onUsernameChange = {},
             onEmailChange = {},
             onContactChange = {},

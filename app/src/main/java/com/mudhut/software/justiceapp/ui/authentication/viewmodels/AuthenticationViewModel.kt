@@ -223,7 +223,7 @@ class AuthenticationViewModel @Inject constructor(
             )
         } else {
             viewModelScope.launch(Dispatchers.IO) {
-                emailPasswordRegistrationUseCase.invoke(
+                emailPasswordLoginUseCase.invoke(
                     loginUiState.value.email,
                     loginUiState.value.password
                 ).collect {
@@ -267,7 +267,7 @@ class AuthenticationViewModel @Inject constructor(
             )
         } else {
             viewModelScope.launch(Dispatchers.IO) {
-                emailPasswordLoginUseCase.invoke(
+                emailPasswordRegistrationUseCase.invoke(
                     registrationUiState.value.email,
                     registrationUiState.value.password
                 ).collect {

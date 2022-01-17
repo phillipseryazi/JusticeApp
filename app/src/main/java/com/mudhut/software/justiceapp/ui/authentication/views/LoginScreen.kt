@@ -30,7 +30,7 @@ import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 @Composable
 fun LoginScreen(
     navigateToRegistration: () -> Unit,
-    navigateToHome: () -> Unit,
+    navigateToDashboard: () -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onLoginPressed: () -> Unit,
@@ -56,7 +56,7 @@ fun LoginScreen(
 
     if (uiState.isAuthorised) {
         LaunchedEffect(uiState.isAuthorised) {
-            navigateToHome()
+            navigateToDashboard()
         }
     }
 
@@ -74,7 +74,7 @@ fun LoginScreen(
                 LoginTitleSection()
                 Spacer(modifier = Modifier.height(24.dp))
                 LoginSection(
-                    navigateToHome,
+                    navigateToDashboard,
                     navigateToRegistration,
                     onEmailChange = onEmailChange,
                     onPasswordChange = onPasswordChange,
@@ -308,7 +308,7 @@ fun LoginScreenPreview() {
     JusticeAppTheme {
         LoginScreen(
             navigateToRegistration = {},
-            navigateToHome = {},
+            navigateToDashboard = {},
             onEmailChange = {},
             onPasswordChange = {},
             onLoginPressed = {},

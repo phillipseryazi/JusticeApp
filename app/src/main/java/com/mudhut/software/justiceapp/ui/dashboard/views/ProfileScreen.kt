@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun HomeScreen() {
+fun ProfileScreen() {
     Column(modifier = Modifier.fillMaxSize()) {
-        Text("Home Screen")
+        Text("Profile Screen")
     }
 }
