@@ -4,11 +4,13 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.mudhut.software.justiceapp.ui.dashboard.views.DashboardScreen
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.mudhut.software.justiceapp.ui.camera.views.CameraScreen
 import com.mudhut.software.justiceapp.ui.dashboard.views.HomeScreen
 import com.mudhut.software.justiceapp.ui.dashboard.views.NotificationScreen
 import com.mudhut.software.justiceapp.ui.dashboard.views.ProfileScreen
 
+@ExperimentalPermissionsApi
 fun NavGraphBuilder.bottomBarGraph(navController: NavController) {
     navigation(
         startDestination = Destination.HomeScreen.route,
@@ -22,6 +24,9 @@ fun NavGraphBuilder.bottomBarGraph(navController: NavController) {
             }
             composable(Destination.ProfileScreen.route) {
                 ProfileScreen()
+            }
+            composable(Destination.CameraScreen.route) {
+                CameraScreen()
             }
         }
     )

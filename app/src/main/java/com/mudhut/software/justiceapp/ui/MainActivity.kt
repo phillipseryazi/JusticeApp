@@ -6,11 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mudhut.software.justiceapp.navigation.NavigationComposable
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @ExperimentalPagerApi
+@ExperimentalPermissionsApi
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 

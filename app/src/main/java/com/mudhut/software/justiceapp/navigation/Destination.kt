@@ -9,6 +9,7 @@ sealed class Destination(val route: String) {
     object HomeScreen : Destination(HOME_SCREEN)
     object NotificationScreen : Destination(NOTIFICATION_SCREEN)
     object ProfileScreen : Destination(PROFILE_SCREEN)
+    object CameraScreen : Destination(CAMERA_SCREEN)
 
     companion object {
         // Auth routes
@@ -21,6 +22,7 @@ sealed class Destination(val route: String) {
         private const val HOME_SCREEN = "home_screen"
         private const val NOTIFICATION_SCREEN = "notification_screen"
         private const val PROFILE_SCREEN = "profile_screen"
+        private const val CAMERA_SCREEN = "camera_screen"
 
     }
 }

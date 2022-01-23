@@ -20,12 +20,14 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.navigation.Destination
 import com.mudhut.software.justiceapp.navigation.bottomBarGraph
 import com.mudhut.software.justiceapp.ui.dashboard.models.BottomNavItem
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 
+@ExperimentalPermissionsApi
 @Composable
 fun DashboardScreen() {
     val scaffoldState = rememberScaffoldState()
@@ -129,6 +131,7 @@ fun BottomNavigationBar(
     }
 }
 
+@ExperimentalPermissionsApi
 @Preview
 @Composable
 fun DashboardScreenPreview() {

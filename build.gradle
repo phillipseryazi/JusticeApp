@@ -9,6 +9,11 @@ buildscript {
         kotlin_play_services = '1.3.5'
         hilt_navigation = '1.0.0-rc01'
         datastore = '1.0.0'
+        camerax_version = '1.0.2'
+        camera_view = '1.0.0-alpha32'
+        firebase_bom = '29.0.3'
+        camera_video = '1.1.0-alpha12'
+        accompanist_permissions = '0.21.1-beta'
     }
     repositories {
         google()
