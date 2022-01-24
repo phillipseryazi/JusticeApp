@@ -90,7 +90,6 @@ fun NavGraphBuilder.authGraph(navController: NavController) {
                 )
             }
 
-
             composable(Destination.DashboardScreen.route) {
                 DashboardScreen()
             }

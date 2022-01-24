@@ -29,7 +29,11 @@ fun PermissionComposable(permissions: List<String>) {
         ) {
             Text(
                 "For JusticeApp to work properly please grant the following permissions.",
-                modifier = Modifier.padding(start = 32.dp, end = 32.dp, top = 32.dp),
+                modifier = Modifier.padding(
+                    start = 32.dp,
+                    end = 32.dp,
+                    top = 32.dp
+                ),
                 textAlign = TextAlign.Center
             )
 
@@ -49,7 +53,10 @@ fun PermissionSection(label: String) {
     Surface(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
-            .padding(start = 32.dp, end = 32.dp)
+            .padding(
+                start = 32.dp,
+                end = 32.dp
+            )
             .height(40.dp),
         color = MaterialTheme.colors.secondaryVariant
     ) {

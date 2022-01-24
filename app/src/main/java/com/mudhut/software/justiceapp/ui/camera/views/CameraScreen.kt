@@ -36,9 +36,6 @@ import java.util.*
 @ExperimentalPermissionsApi
 @Composable
 fun CameraScreen() {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val context = LocalContext.current
-
     val permissionsList = listOf(
         Manifest.permission.CAMERA,
         Manifest.permission.RECORD_AUDIO,
@@ -57,8 +54,18 @@ fun CameraScreen() {
         permissionsNotAvailableContent = {
 
         }) {
-
+        Scaffold(modifier = Modifier.fillMaxSize()) {
+            CameraComposable(
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
+}
+
+@Composable
+fun CameraComposable(modifier: Modifier) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
 
     val cameraProviderFuture = remember {
         ProcessCameraProvider.getInstance(context)
@@ -70,113 +77,110 @@ fun CameraScreen() {
         }
     }
 
-    Scaffold(modifier = Modifier.fillMaxSize()) {
-        Box() {
-            AndroidView(
-                factory = {
-                    previewView
-                },
-                modifier = Modifier.fillMaxSize()
-            ) {
-                val qualitySelector = QualitySelector.fromOrderedList(
-                    listOf(
-                        Quality.FHD,
-                        Quality.HD,
-                        Quality.SD
-                    ),
-                    FallbackStrategy.lowerQualityOrHigherThan(Quality.SD)
+    Box(modifier = modifier) {
+        AndroidView(
+            factory = {
+                previewView
+            },
+            modifier = Modifier.fillMaxSize()
+        ) {
+            val qualitySelector = QualitySelector.fromOrderedList(
+                listOf(
+                    Quality.FHD,
+                    Quality.HD,
+                    Quality.SD
+                ),
+                FallbackStrategy.lowerQualityOrHigherThan(Quality.SD)
+            )
+
+            val recorder = Recorder.Builder()
+                .setExecutor(ContextCompat.getMainExecutor(context))
+                .setQualitySelector(qualitySelector)
+                .build()
+
+            val videoCapture = VideoCapture.withOutput(recorder)
+
+            val cameraProvider = cameraProviderFuture.get()
+
+            val preview = androidx.camera.core.Preview.Builder()
+                .build()
+                .also {
+                    it.setSurfaceProvider(previewView.surfaceProvider)
+                }
+
+            try {
+                cameraProvider.bindToLifecycle(
+                    lifecycleOwner,
+                    CameraSelector.DEFAULT_BACK_CAMERA,
+                    preview,
+                    videoCapture
                 )
+            } catch (exc: Exception) {
+                Log.e("CAMERA", "Use case binding failed", exc)
+            }
 
-                val recorder = Recorder.Builder()
-                    .setExecutor(ContextCompat.getMainExecutor(context))
-                    .setQualitySelector(qualitySelector)
-                    .build()
+            val videoRecordEventListener = androidx.core.util.Consumer<VideoRecordEvent> {
+                when (it) {
+                    is VideoRecordEvent.Start -> {
 
-                val videoCapture = VideoCapture.withOutput(recorder)
-
-                val cameraProvider = cameraProviderFuture.get()
-
-                val preview = androidx.camera.core.Preview.Builder()
-                    .build()
-                    .also {
-                        it.setSurfaceProvider(previewView.surfaceProvider)
                     }
+                    is VideoRecordEvent.Pause -> {
 
-                try {
-                    cameraProvider.bindToLifecycle(
-                        lifecycleOwner,
-                        CameraSelector.DEFAULT_BACK_CAMERA,
-                        preview,
-                        videoCapture
-                    )
-                } catch (exc: Exception) {
-                    Log.e("CAMERA", "Use case binding failed", exc)
-                }
+                    }
+                    is VideoRecordEvent.Resume -> {
 
-                val videoRecordEventListener = androidx.core.util.Consumer<VideoRecordEvent> {
-                    when (it) {
-                        is VideoRecordEvent.Start -> {
+                    }
+                    is VideoRecordEvent.Finalize -> {
 
-                        }
-                        is VideoRecordEvent.Pause -> {
+                    }
+                    is VideoRecordEvent.Status -> {
+                        val stats: RecordingStats = it.recordingStats
 
-                        }
-                        is VideoRecordEvent.Resume -> {
-
-                        }
-                        is VideoRecordEvent.Finalize -> {
-
-                        }
-                        is VideoRecordEvent.Status -> {
-                            val stats: RecordingStats = it.recordingStats
-
-                        }
                     }
                 }
+            }
 
+            val name = "CameraX-recording-" + SimpleDateFormat(FILENAME_FORMAT, Locale.US)
+                .format(System.currentTimeMillis()) + ".mp4"
 
-                val name = "CameraX-recording-" + SimpleDateFormat(FILENAME_FORMAT, Locale.US)
-                    .format(System.currentTimeMillis()) + ".mp4"
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Video.Media.DISPLAY_NAME, name)
+            }
 
-                val contentValues = ContentValues().apply {
-                    put(MediaStore.Video.Media.DISPLAY_NAME, name)
-                }
-
-                val mediaStoreOutput = MediaStoreOutputOptions.Builder(
-                    context.contentResolver,
-                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                ).setContentValues(contentValues).build()
+            val mediaStoreOutput = MediaStoreOutputOptions.Builder(
+                context.contentResolver,
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            ).setContentValues(contentValues).build()
 
 //                val activeRecording = videoCapture.output
 //                    .prepareRecording(context, mediaStoreOutput)
 //                    .withAudioEnabled()
 //                    .start(ContextCompat.getMainExecutor(context), videoRecordEventListener)
 
-            }
+        }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                CameraButton(
-                    modifier = Modifier.size(width = 200.dp, height = 50.dp),
-                    label = "STOP",
-                    onButtonClick = {}
-                )
-                CameraButton(
-                    modifier = Modifier.size(width = 200.dp, height = 50.dp),
-                    label = "PLAY",
-                    onButtonClick = {}
-                )
-                CameraButton(
-                    modifier = Modifier.size(width = 200.dp, height = 50.dp),
-                    label = "PAUSE",
-                    onButtonClick = {}
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            CameraButton(
+                modifier = Modifier.size(width = 200.dp, height = 50.dp),
+                label = "STOP",
+                onButtonClick = {}
+            )
+            CameraButton(
+                modifier = Modifier.size(width = 200.dp, height = 50.dp),
+                label = "PLAY",
+                onButtonClick = {}
+            )
+            CameraButton(
+                modifier = Modifier.size(width = 200.dp, height = 50.dp),
+                label = "PAUSE",
+                onButtonClick = {}
 
-                )
-            }
+            )
         }
     }
 }
