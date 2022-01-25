@@ -21,7 +21,10 @@ import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 
 @Composable
-fun PermissionComposable(permissions: List<String>) {
+fun PermissionComposable(
+    permissions: List<String>,
+    grantPermissions: () -> Unit
+) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -41,7 +44,7 @@ fun PermissionComposable(permissions: List<String>) {
                 PermissionSection(label = it)
             }
 
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = grantPermissions) {
                 Text("Grant Permissions")
             }
         }
@@ -94,6 +97,9 @@ fun PermissionSection(label: String) {
 @Composable
 fun PermissionComposablePreview() {
     JusticeAppTheme {
-        PermissionComposable(listOf("Hello", "World", "There"))
+        PermissionComposable(
+            permissions = listOf("Hello", "World", "There"),
+            grantPermissions = {}
+        )
     }
 }

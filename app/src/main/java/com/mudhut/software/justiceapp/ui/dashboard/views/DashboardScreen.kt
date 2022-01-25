@@ -60,7 +60,7 @@ fun DashboardScreen() {
                         )
                     ),
                     navController = navController,
-                    currentDestination = currentDestination ?: "",
+                    currentDestination = currentDestination,
                     modifier = Modifier
                         .padding(
                             start = 0.dp,

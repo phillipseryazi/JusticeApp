@@ -49,7 +49,11 @@ fun CameraScreen() {
     PermissionsRequired(
         multiplePermissionsState = permissionState,
         permissionsNotGrantedContent = {
-            PermissionComposable(permissions = permissionsList)
+            PermissionComposable(
+                permissions = permissionsList,
+                grantPermissions = {
+                    permissionState.launchMultiplePermissionRequest()
+                })
         },
         permissionsNotAvailableContent = {
 
@@ -94,7 +98,6 @@ fun CameraComposable(modifier: Modifier) {
             )
 
             val recorder = Recorder.Builder()
-                .setExecutor(ContextCompat.getMainExecutor(context))
                 .setQualitySelector(qualitySelector)
                 .build()
 
@@ -135,12 +138,11 @@ fun CameraComposable(modifier: Modifier) {
                     }
                     is VideoRecordEvent.Status -> {
                         val stats: RecordingStats = it.recordingStats
-
                     }
                 }
             }
 
-            val name = "CameraX-recording-" + SimpleDateFormat(FILENAME_FORMAT, Locale.US)
+            val name = "justiceapp-recording-" + SimpleDateFormat(FILENAME_FORMAT, Locale.US)
                 .format(System.currentTimeMillis()) + ".mp4"
 
             val contentValues = ContentValues().apply {
@@ -152,13 +154,16 @@ fun CameraComposable(modifier: Modifier) {
                 MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
             ).setContentValues(contentValues).build()
 
-//                val activeRecording = videoCapture.output
-//                    .prepareRecording(context, mediaStoreOutput)
-//                    .withAudioEnabled()
-//                    .start(ContextCompat.getMainExecutor(context), videoRecordEventListener)
+            try {
+                val activeRecording = videoCapture.output
+                    .prepareRecording(context, mediaStoreOutput)
+                    .withAudioEnabled()
+                    .start(ContextCompat.getMainExecutor(context), videoRecordEventListener)
+            } catch (e: SecurityException) {
+                Log.e("Camera Exception", e.localizedMessage ?: "")
+            }
 
         }
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -168,7 +173,8 @@ fun CameraComposable(modifier: Modifier) {
             CameraButton(
                 modifier = Modifier.size(width = 200.dp, height = 50.dp),
                 label = "STOP",
-                onButtonClick = {}
+                onButtonClick = {
+                }
             )
             CameraButton(
                 modifier = Modifier.size(width = 200.dp, height = 50.dp),

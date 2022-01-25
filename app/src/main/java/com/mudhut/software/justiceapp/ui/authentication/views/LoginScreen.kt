@@ -74,8 +74,7 @@ fun LoginScreen(
                 LoginTitleSection()
                 Spacer(modifier = Modifier.height(24.dp))
                 LoginSection(
-                    navigateToDashboard,
-                    navigateToRegistration,
+                    navigateToRegistration = navigateToRegistration,
                     onEmailChange = onEmailChange,
                     onPasswordChange = onPasswordChange,
                     onLoginPressed = onLoginPressed,
@@ -105,7 +104,6 @@ fun LoginTitleSection() {
 
 @Composable
 fun LoginSection(
-    navigateToHome: () -> Unit,
     navigateToRegistration: () -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
