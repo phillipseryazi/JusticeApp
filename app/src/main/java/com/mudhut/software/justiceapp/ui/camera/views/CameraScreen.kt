@@ -8,14 +8,18 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
@@ -164,29 +168,42 @@ fun CameraComposable(modifier: Modifier) {
             }
 
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            CameraButton(
-                modifier = Modifier.size(width = 200.dp, height = 50.dp),
-                label = "STOP",
-                onButtonClick = {
-                }
-            )
-            CameraButton(
-                modifier = Modifier.size(width = 200.dp, height = 50.dp),
-                label = "PLAY",
-                onButtonClick = {}
-            )
-            CameraButton(
-                modifier = Modifier.size(width = 200.dp, height = 50.dp),
-                label = "PAUSE",
-                onButtonClick = {}
 
-            )
+        Surface(
+            modifier = Modifier
+                .padding(
+                    start = 32.dp,
+                    end = 32.dp,
+                    bottom = 32.dp
+                )
+                .align(Alignment.BottomCenter),
+            color = Color.Black,
+            shape = RoundedCornerShape(12.dp),
+            elevation = 2.dp
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                CameraButton(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .size(40.dp)
+                        .clickable { }
+                )
+                CameraButton(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .size(40.dp)
+                        .clickable { }
+                )
+                CameraButton(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .size(40.dp)
+                        .clickable { }
+                )
+            }
         }
     }
 }
@@ -194,20 +211,20 @@ fun CameraComposable(modifier: Modifier) {
 
 @Composable
 fun CameraButton(
-    modifier: Modifier,
-    label: String,
-    onButtonClick: () -> Unit
+    modifier: Modifier
 ) {
-    Button(
-        onClick = onButtonClick,
-        modifier = modifier
+    Surface(
+        modifier = modifier,
+        shape = CircleShape,
+        color = Color.Transparent,
+        border = BorderStroke(2.dp, color = Color.White)
     ) {
-        Text(label)
+
     }
 }
 
 @ExperimentalPermissionsApi
-@Preview
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun CameraScreenPreview() {
     JusticeAppTheme {
