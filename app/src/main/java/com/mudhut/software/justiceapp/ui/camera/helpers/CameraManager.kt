@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.provider.MediaStore
+import android.util.Log
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
 import androidx.core.content.ContextCompat
@@ -43,10 +44,17 @@ class CameraManager(val context: Context) {
 
             }
             is VideoRecordEvent.Finalize -> {
-
+                if (it.hasError()) {
+                    Log.e("Recording Error", it.error.toString())
+                    Log.e("Recording Error", it.cause?.message.toString())
+                } else {
+                    it.outputResults.outputUri
+                    Log.d("Recording", it.outputResults.outputUri.path.toString())
+                }
             }
             is VideoRecordEvent.Status -> {
                 val stats: RecordingStats = it.recordingStats
+                stats.recordedDurationNanos
             }
         }
     }
