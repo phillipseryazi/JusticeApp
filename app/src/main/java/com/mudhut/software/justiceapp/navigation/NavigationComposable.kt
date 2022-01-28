@@ -2,12 +2,12 @@ package com.mudhut.software.justiceapp.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.mudhut.software.justiceapp.ui.dashboard.views.DashboardScreen
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 @ExperimentalPagerApi
+@ExperimentalPermissionsApi
 @Composable
 fun NavigationComposable() {
     val navController = rememberNavController()

@@ -7,6 +7,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mudhut.software.justiceapp.ui.authentication.viewmodels.AuthenticationViewModel
 import com.mudhut.software.justiceapp.ui.authentication.views.LoginScreen
 import com.mudhut.software.justiceapp.ui.authentication.views.RegistrationScreen
@@ -14,6 +15,7 @@ import com.mudhut.software.justiceapp.ui.dashboard.views.DashboardScreen
 import com.mudhut.software.justiceapp.ui.onboarding.views.OnBoardingScreen
 
 @ExperimentalPagerApi
+@ExperimentalPermissionsApi
 fun NavGraphBuilder.authGraph(navController: NavController) {
     navigation(
         startDestination = Destination.OnBoardingScreen.route,
