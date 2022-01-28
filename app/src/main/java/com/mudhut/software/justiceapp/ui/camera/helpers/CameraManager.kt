@@ -18,7 +18,7 @@ class CameraManager(val context: Context) {
 
     private val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
-    private val name = "justiceapp-recording-" + SimpleDateFormat(FILENAME_FORMAT, Locale.US)
+    private val name = "justice-app-recording-" + SimpleDateFormat(FILENAME_FORMAT, Locale.US)
         .format(System.currentTimeMillis()) + ".mp4"
 
     private val contentValues = ContentValues().apply {
@@ -45,7 +45,6 @@ class CameraManager(val context: Context) {
             }
             is VideoRecordEvent.Finalize -> {
                 if (it.hasError()) {
-                    Log.e("Recording Error", it.error.toString())
                     Log.e("Recording Error", it.cause?.message.toString())
                 } else {
                     it.outputResults.outputUri
@@ -72,6 +71,7 @@ class CameraManager(val context: Context) {
 
     private fun getRecorder(): Recorder {
         return Recorder.Builder()
+            .setExecutor(ContextCompat.getMainExecutor(context))
             .setQualitySelector(getQualitySelector())
             .build()
     }
