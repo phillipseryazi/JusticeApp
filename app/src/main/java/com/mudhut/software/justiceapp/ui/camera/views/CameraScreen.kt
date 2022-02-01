@@ -38,7 +38,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.mudhut.software.justiceapp.R
-import com.mudhut.software.justiceapp.ui.common.PermissionComposable
+import com.mudhut.software.justiceapp.ui.common.GoToSettingsComposable
+import com.mudhut.software.justiceapp.ui.common.PermissionsComposable
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 import com.mudhut.software.justiceapp.utils.FILENAME_FORMAT
 import com.mudhut.software.justiceapp.utils.INITIAL_ELAPSED_TIME
@@ -49,7 +50,7 @@ import java.util.concurrent.TimeUnit
 
 @ExperimentalPermissionsApi
 @Composable
-fun CameraScreen() {
+fun CameraScreen(goToSettings: () -> Unit) {
     val permissionsList = listOf(
         Manifest.permission.CAMERA,
         Manifest.permission.RECORD_AUDIO,
@@ -64,14 +65,17 @@ fun CameraScreen() {
     PermissionsRequired(
         multiplePermissionsState = permissionState,
         permissionsNotGrantedContent = {
-            PermissionComposable(
+            PermissionsComposable(
                 permissions = permissionsList,
                 grantPermissions = {
                     permissionState.launchMultiplePermissionRequest()
                 })
         },
         permissionsNotAvailableContent = {
-
+            GoToSettingsComposable(
+                permissions = permissionsList,
+                goToSettings = goToSettings
+            )
         }) {
         Scaffold(modifier = Modifier.fillMaxSize()) {
             CameraComposable(
@@ -172,7 +176,7 @@ fun CameraComposable(modifier: Modifier) {
         mutableStateOf<Recording?>(null)
     }
 
-    Box(modifier = modifier) {
+    Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
@@ -209,7 +213,6 @@ fun CameraComposable(modifier: Modifier) {
                 previewView
             }
         ) {
-
             videoRecordEventListener.value = androidx.core.util.Consumer<VideoRecordEvent> {
                 when (it) {
                     is VideoRecordEvent.Start -> {
@@ -328,7 +331,6 @@ fun CameraComposable(modifier: Modifier) {
 
                                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                                     Log.d("Camera", "Image Capture: ${output.savedUri}")
-
                                 }
                             }
                         )
@@ -396,6 +398,6 @@ fun RecordTimeIndicator(
 @Composable
 fun CameraScreenPreview() {
     JusticeAppTheme {
-        CameraScreen()
+        CameraScreen(goToSettings = {})
     }
 }
