@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -37,8 +38,10 @@ import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.ui.common.PermissionComposable
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 import com.mudhut.software.justiceapp.utils.FILENAME_FORMAT
+import com.mudhut.software.justiceapp.utils.INITIAL_ELAPSED_TIME
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 @ExperimentalPermissionsApi
@@ -80,6 +83,10 @@ fun CameraScreen() {
 fun CameraComposable(modifier: Modifier) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
+
+    val elapsedTime = remember {
+        mutableStateOf(INITIAL_ELAPSED_TIME)
+    }
 
     val isRecording = rememberSaveable {
         mutableStateOf(false)
@@ -185,6 +192,15 @@ fun CameraComposable(modifier: Modifier) {
                     }
                     is VideoRecordEvent.Status -> {
                         val stats: RecordingStats = it.recordingStats
+                        val hrs = TimeUnit.NANOSECONDS
+                            .toHours(stats.recordedDurationNanos)
+                        val mins = TimeUnit.NANOSECONDS
+                            .toMinutes(stats.recordedDurationNanos) % 60
+                        val secs = TimeUnit.NANOSECONDS
+                            .toSeconds(stats.recordedDurationNanos) % 60
+
+                        val time = String.format("%02d:%02d:%02d", hrs, mins, secs)
+                        elapsedTime.value = time
                         Log.d("Recording Stats", stats.recordedDurationNanos.toString())
                     }
                 }
@@ -274,6 +290,12 @@ fun CameraComposable(modifier: Modifier) {
                 )
             }
         }
+        RecordTimeIndicator(
+            modifier = Modifier
+                .padding(top = 32.dp)
+                .align(Alignment.TopCenter),
+            elapsedTime = elapsedTime.value
+        )
     }
 }
 
@@ -303,9 +325,24 @@ fun CameraButton(
 }
 
 @Composable
-fun RecordTimeIndicator(modifier: Modifier) {
-
-
+fun RecordTimeIndicator(
+    modifier: Modifier,
+    elapsedTime: String
+) {
+    Surface(
+        modifier = modifier,
+        color = Color.Black,
+        shape = RoundedCornerShape(12.dp),
+        elevation = 2.dp
+    ) {
+        Text(
+            elapsedTime,
+            color = Color.White,
+            style = MaterialTheme.typography.body2,
+            modifier = Modifier.width(100.dp),
+            textAlign = TextAlign.Center
+        )
+    }
 }
 
 @ExperimentalPermissionsApi
