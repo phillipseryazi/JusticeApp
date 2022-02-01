@@ -3,10 +3,13 @@ package com.mudhut.software.justiceapp.ui.camera.views
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentValues
+import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import android.view.ViewGroup
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
 import androidx.camera.view.PreviewView
@@ -84,6 +87,9 @@ fun CameraComposable(modifier: Modifier) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
 
+    val name = "justice-app-recording-" + SimpleDateFormat(FILENAME_FORMAT, Locale.US)
+        .format(System.currentTimeMillis()) + ".mp4"
+
     val elapsedTime = remember {
         mutableStateOf(INITIAL_ELAPSED_TIME)
     }
@@ -120,6 +126,38 @@ fun CameraComposable(modifier: Modifier) {
 
     val videoCapture = remember<VideoCapture<Recorder>> {
         VideoCapture.withOutput(recorder)
+    }
+
+    val videoOutputOptions = remember {
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Video.Media.DISPLAY_NAME, name)
+        }
+
+        MediaStoreOutputOptions.Builder(
+            context.contentResolver,
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+        ).setContentValues(contentValues).build()
+    }
+
+    val imageCapture = remember {
+        ImageCapture.Builder().build()
+    }
+
+    val imageOutputOptions = remember {
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/justice-app-image-")
+            }
+        }
+
+        ImageCapture.OutputFileOptions
+            .Builder(
+                context.contentResolver,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                contentValues
+            ).build()
     }
 
     val videoRecordEventListener = remember {
@@ -161,7 +199,8 @@ fun CameraComposable(modifier: Modifier) {
                         lifecycleOwner,
                         CameraSelector.DEFAULT_BACK_CAMERA,
                         preview,
-                        videoCapture
+                        videoCapture,
+                        imageCapture
                     )
                 } catch (exc: Exception) {
                     Log.e("CAMERA", "Use case binding failed", exc)
@@ -184,42 +223,30 @@ fun CameraComposable(modifier: Modifier) {
                     }
                     is VideoRecordEvent.Finalize -> {
                         if (it.hasError()) {
-                            Log.e("Recording Error", it.cause?.message.toString())
+                            Log.e("Camera", "Recording Error ${it.cause?.message.toString()}")
                         } else {
-                            it.outputResults.outputUri
-                            Log.d("Recording", it.outputResults.outputUri.path.toString())
+                            val videoUri = it.outputResults.outputUri
+                            Log.d("Camera", "Recording stats $videoUri")
                         }
                     }
                     is VideoRecordEvent.Status -> {
                         val stats: RecordingStats = it.recordingStats
-                        val hrs = TimeUnit.NANOSECONDS
+                        val hh = TimeUnit.NANOSECONDS
                             .toHours(stats.recordedDurationNanos)
-                        val mins = TimeUnit.NANOSECONDS
+                        val mm = TimeUnit.NANOSECONDS
                             .toMinutes(stats.recordedDurationNanos) % 60
-                        val secs = TimeUnit.NANOSECONDS
+                        val ss = TimeUnit.NANOSECONDS
                             .toSeconds(stats.recordedDurationNanos) % 60
 
-                        val time = String.format("%02d:%02d:%02d", hrs, mins, secs)
+                        val time = String.format("%02d:%02d:%02d", hh, mm, ss)
                         elapsedTime.value = time
-                        Log.d("Recording Stats", stats.recordedDurationNanos.toString())
+                        Log.d("Camera", "Recording stats ${stats.recordedDurationNanos}")
                     }
                 }
             }
 
-            val name = "justice-app-recording-" + SimpleDateFormat(FILENAME_FORMAT, Locale.US)
-                .format(System.currentTimeMillis()) + ".mp4"
-
-            val contentValues = ContentValues().apply {
-                put(MediaStore.Video.Media.DISPLAY_NAME, name)
-            }
-
-            val mediaStoreOutput = MediaStoreOutputOptions.Builder(
-                context.contentResolver,
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-            ).setContentValues(contentValues).build()
-
             val activeRecording = videoCapture.output
-                .prepareRecording(context, mediaStoreOutput)
+                .prepareRecording(context, videoOutputOptions)
                 .withAudioEnabled()
 
             pendingRecording.value = activeRecording
@@ -286,7 +313,26 @@ fun CameraComposable(modifier: Modifier) {
                         .size(40.dp),
                     icon = R.drawable.ic_camera,
                     iconColor = Color.White,
-                    onButtonClick = { }
+                    onButtonClick = {
+                        imageCapture.takePicture(
+                            imageOutputOptions,
+                            ContextCompat.getMainExecutor(context),
+                            object : ImageCapture.OnImageSavedCallback {
+                                override fun onError(exc: ImageCaptureException) {
+                                    Log.e(
+                                        "Camera",
+                                        "Image capture failed: ${exc.message}",
+                                        exc
+                                    )
+                                }
+
+                                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                                    Log.d("Camera", "Image Capture: ${output.savedUri}")
+
+                                }
+                            }
+                        )
+                    }
                 )
             }
         }
