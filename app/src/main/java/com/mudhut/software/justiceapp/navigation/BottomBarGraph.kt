@@ -1,5 +1,8 @@
 package com.mudhut.software.justiceapp.navigation
 
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -26,7 +29,14 @@ fun NavGraphBuilder.bottomBarGraph(navController: NavController) {
                 ProfileScreen()
             }
             composable(Destination.CameraScreen.route) {
-                CameraScreen(goToSettings = {})
+                CameraScreen(goToSettings = {
+                    navController.context.startActivity(
+                        Intent(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            Uri.fromParts("package", navController.context.packageName, null)
+                        )
+                    )
+                })
             }
         }
     )

@@ -73,15 +73,22 @@ fun DashboardScreen() {
             }
         },
         floatingActionButton = {
-            FloatingActionButton(
-                shape = CircleShape,
-                contentColor = Color.White,
-                onClick = { }
+            if (currentDestination == Destination.HomeScreen.route ||
+                currentDestination == Destination.NotificationScreen.route ||
+                currentDestination == Destination.ProfileScreen.route
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_camera),
-                    contentDescription = null
-                )
+                FloatingActionButton(
+                    shape = CircleShape,
+                    contentColor = Color.White,
+                    onClick = {
+                        navController.navigate(Destination.CameraScreen.route)
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_camera),
+                        contentDescription = null
+                    )
+                }
             }
         },
         floatingActionButtonPosition = FabPosition.End
