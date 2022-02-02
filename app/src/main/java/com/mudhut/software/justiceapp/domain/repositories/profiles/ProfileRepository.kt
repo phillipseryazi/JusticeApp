@@ -28,14 +28,15 @@ class ProfileRepository @Inject constructor(
             "username" to username,
             "email" to email,
             "contact" to contact,
-            "userTYpe" to userType,
-            "avatar" to avatar
+            "userType" to userType,
+            "avatar" to avatar,
+            "isVerified" to false
         )
         firebaseAuth.uid?.let {
-            firestore.collection("Profiles").document(it).set(userMap).await()
+            firestore.collection("profiles").document(it).set(userMap).await()
         }
         val profile = firebaseAuth.uid?.let {
-            firestore.collection("Profiles").document(it).get().await()
+            firestore.collection("profiles").document(it).get().await()
                 .toObject(Profile::class.java)
         }
         emit(Resource.Success(data = profile))

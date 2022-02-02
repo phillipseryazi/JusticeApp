@@ -2,6 +2,7 @@ package com.mudhut.software.justiceapp.utils
 
 import android.content.Context
 import android.content.ContextWrapper
+import com.mudhut.software.justiceapp.navigation.Destination
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -44,4 +45,16 @@ fun getCameraOutputDirectory(context: Context): File {
             Locale.US
         ).format(System.currentTimeMillis())
     ).apply { mkdir() }
+}
+
+
+fun getDestinationType(currentDestination: String?): Destination? {
+    return when (currentDestination) {
+        Destination.HomeScreen.route -> Destination.HomeScreen
+        Destination.ExploreScreen.route -> Destination.ExploreScreen
+        Destination.CreateScreen.route -> Destination.CreateScreen
+        Destination.InboxScreen.route -> Destination.InboxScreen
+        Destination.SettingsScreen.route -> Destination.SettingsScreen
+        else -> null
+    }
 }
