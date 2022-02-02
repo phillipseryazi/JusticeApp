@@ -16,9 +16,9 @@ import androidx.compose.ui.unit.dp
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 
 @Composable
-fun PermissionsComposable(
+fun GoToSettingsComposable(
     permissions: List<String>,
-    grantPermissions: () -> Unit
+    goToSettings: () -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -26,7 +26,8 @@ fun PermissionsComposable(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "For JusticeApp to work properly please grant the following permissions.",
+                "For JusticeApp to work properly please grant the following permissions. " +
+                        "You can allow or deny these permissions in Phone Settings.",
                 modifier = Modifier.padding(
                     start = 32.dp,
                     end = 32.dp,
@@ -39,8 +40,8 @@ fun PermissionsComposable(
                 PermissionsSection(label = it)
             }
 
-            Button(onClick = grantPermissions) {
-                Text("Grant Permissions")
+            Button(onClick = goToSettings) {
+                Text("Go to Settings")
             }
         }
     }
@@ -48,11 +49,11 @@ fun PermissionsComposable(
 
 @Preview
 @Composable
-fun PermissionComposablePreview() {
+fun GoToSettingsComposablePreview() {
     JusticeAppTheme {
-        PermissionsComposable(
+        GoToSettingsComposable(
             permissions = listOf("Hello", "World", "There"),
-            grantPermissions = {}
+            goToSettings = {}
         )
     }
 }

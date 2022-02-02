@@ -3,10 +3,13 @@ package com.mudhut.software.justiceapp.ui.camera.views
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentValues
+import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
 import android.view.ViewGroup
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
 import androidx.camera.view.PreviewView
@@ -25,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -34,20 +38,24 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.mudhut.software.justiceapp.R
-import com.mudhut.software.justiceapp.ui.common.PermissionComposable
+import com.mudhut.software.justiceapp.ui.common.GoToSettingsComposable
+import com.mudhut.software.justiceapp.ui.common.PermissionsComposable
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 import com.mudhut.software.justiceapp.utils.FILENAME_FORMAT
+import com.mudhut.software.justiceapp.utils.INITIAL_ELAPSED_TIME
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 @ExperimentalPermissionsApi
 @Composable
-fun CameraScreen() {
+fun CameraScreen(goToSettings: () -> Unit) {
     val permissionsList = listOf(
         Manifest.permission.CAMERA,
         Manifest.permission.RECORD_AUDIO,
-        Manifest.permission.READ_EXTERNAL_STORAGE
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
 
     val permissionState = rememberMultiplePermissionsState(
@@ -57,14 +65,17 @@ fun CameraScreen() {
     PermissionsRequired(
         multiplePermissionsState = permissionState,
         permissionsNotGrantedContent = {
-            PermissionComposable(
+            PermissionsComposable(
                 permissions = permissionsList,
                 grantPermissions = {
                     permissionState.launchMultiplePermissionRequest()
                 })
         },
         permissionsNotAvailableContent = {
-
+            GoToSettingsComposable(
+                permissions = permissionsList,
+                goToSettings = goToSettings
+            )
         }) {
         Scaffold(modifier = Modifier.fillMaxSize()) {
             CameraComposable(
@@ -79,6 +90,13 @@ fun CameraScreen() {
 fun CameraComposable(modifier: Modifier) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
+
+    val name = "justice-app-recording-" + SimpleDateFormat(FILENAME_FORMAT, Locale.US)
+        .format(System.currentTimeMillis()) + ".mp4"
+
+    val elapsedTime = remember {
+        mutableStateOf(INITIAL_ELAPSED_TIME)
+    }
 
     val isRecording = rememberSaveable {
         mutableStateOf(false)
@@ -114,6 +132,38 @@ fun CameraComposable(modifier: Modifier) {
         VideoCapture.withOutput(recorder)
     }
 
+    val videoOutputOptions = remember {
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Video.Media.DISPLAY_NAME, name)
+        }
+
+        MediaStoreOutputOptions.Builder(
+            context.contentResolver,
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+        ).setContentValues(contentValues).build()
+    }
+
+    val imageCapture = remember {
+        ImageCapture.Builder().build()
+    }
+
+    val imageOutputOptions = remember {
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/justice-app-image-")
+            }
+        }
+
+        ImageCapture.OutputFileOptions
+            .Builder(
+                context.contentResolver,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                contentValues
+            ).build()
+    }
+
     val videoRecordEventListener = remember {
         mutableStateOf<Consumer<VideoRecordEvent>?>(null)
     }
@@ -126,7 +176,7 @@ fun CameraComposable(modifier: Modifier) {
         mutableStateOf<Recording?>(null)
     }
 
-    Box(modifier = modifier) {
+    Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
@@ -153,7 +203,8 @@ fun CameraComposable(modifier: Modifier) {
                         lifecycleOwner,
                         CameraSelector.DEFAULT_BACK_CAMERA,
                         preview,
-                        videoCapture
+                        videoCapture,
+                        imageCapture
                     )
                 } catch (exc: Exception) {
                     Log.e("CAMERA", "Use case binding failed", exc)
@@ -162,7 +213,6 @@ fun CameraComposable(modifier: Modifier) {
                 previewView
             }
         ) {
-
             videoRecordEventListener.value = androidx.core.util.Consumer<VideoRecordEvent> {
                 when (it) {
                     is VideoRecordEvent.Start -> {
@@ -176,33 +226,30 @@ fun CameraComposable(modifier: Modifier) {
                     }
                     is VideoRecordEvent.Finalize -> {
                         if (it.hasError()) {
-                            Log.e("Recording Error", it.cause?.message.toString())
+                            Log.e("Camera", "Recording Error ${it.cause?.message.toString()}")
                         } else {
-                            it.outputResults.outputUri
-                            Log.d("Recording", it.outputResults.outputUri.path.toString())
+                            val videoUri = it.outputResults.outputUri
+                            Log.d("Camera", "Recording stats $videoUri")
                         }
                     }
                     is VideoRecordEvent.Status -> {
                         val stats: RecordingStats = it.recordingStats
-                        Log.d("Recording Stats", stats.recordedDurationNanos.toString())
+                        val hh = TimeUnit.NANOSECONDS
+                            .toHours(stats.recordedDurationNanos)
+                        val mm = TimeUnit.NANOSECONDS
+                            .toMinutes(stats.recordedDurationNanos) % 60
+                        val ss = TimeUnit.NANOSECONDS
+                            .toSeconds(stats.recordedDurationNanos) % 60
+
+                        val time = String.format("%02d:%02d:%02d", hh, mm, ss)
+                        elapsedTime.value = time
+                        Log.d("Camera", "Recording stats ${stats.recordedDurationNanos}")
                     }
                 }
             }
 
-            val name = "justice-app-recording-" + SimpleDateFormat(FILENAME_FORMAT, Locale.US)
-                .format(System.currentTimeMillis()) + ".mp4"
-
-            val contentValues = ContentValues().apply {
-                put(MediaStore.Video.Media.DISPLAY_NAME, name)
-            }
-
-            val mediaStoreOutput = MediaStoreOutputOptions.Builder(
-                context.contentResolver,
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-            ).setContentValues(contentValues).build()
-
             val activeRecording = videoCapture.output
-                .prepareRecording(context, mediaStoreOutput)
+                .prepareRecording(context, videoOutputOptions)
                 .withAudioEnabled()
 
             pendingRecording.value = activeRecording
@@ -269,10 +316,34 @@ fun CameraComposable(modifier: Modifier) {
                         .size(40.dp),
                     icon = R.drawable.ic_camera,
                     iconColor = Color.White,
-                    onButtonClick = { }
+                    onButtonClick = {
+                        imageCapture.takePicture(
+                            imageOutputOptions,
+                            ContextCompat.getMainExecutor(context),
+                            object : ImageCapture.OnImageSavedCallback {
+                                override fun onError(exc: ImageCaptureException) {
+                                    Log.e(
+                                        "Camera",
+                                        "Image capture failed: ${exc.message}",
+                                        exc
+                                    )
+                                }
+
+                                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                                    Log.d("Camera", "Image Capture: ${output.savedUri}")
+                                }
+                            }
+                        )
+                    }
                 )
             }
         }
+        RecordTimeIndicator(
+            modifier = Modifier
+                .padding(top = 32.dp)
+                .align(Alignment.TopCenter),
+            elapsedTime = elapsedTime.value
+        )
     }
 }
 
@@ -301,11 +372,32 @@ fun CameraButton(
     }
 }
 
+@Composable
+fun RecordTimeIndicator(
+    modifier: Modifier,
+    elapsedTime: String
+) {
+    Surface(
+        modifier = modifier,
+        color = Color.Black,
+        shape = RoundedCornerShape(12.dp),
+        elevation = 2.dp
+    ) {
+        Text(
+            elapsedTime,
+            color = Color.White,
+            style = MaterialTheme.typography.body2,
+            modifier = Modifier.width(100.dp),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
 @ExperimentalPermissionsApi
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun CameraScreenPreview() {
     JusticeAppTheme {
-        CameraScreen()
+        CameraScreen(goToSettings = {})
     }
 }

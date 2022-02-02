@@ -2,6 +2,7 @@ package com.mudhut.software.justiceapp.ui.dashboard.views
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -19,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.navigation.Destination
 import com.mudhut.software.justiceapp.navigation.bottomBarGraph
 import com.mudhut.software.justiceapp.ui.dashboard.models.BottomNavItem
@@ -68,7 +71,27 @@ fun DashboardScreen() {
                         )
                 )
             }
-        }
+        },
+        floatingActionButton = {
+            if (currentDestination == Destination.HomeScreen.route ||
+                currentDestination == Destination.NotificationScreen.route ||
+                currentDestination == Destination.ProfileScreen.route
+            ) {
+                FloatingActionButton(
+                    shape = CircleShape,
+                    contentColor = Color.White,
+                    onClick = {
+                        navController.navigate(Destination.CameraScreen.route)
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_camera),
+                        contentDescription = null
+                    )
+                }
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End
     ) {
         NavHost(
             navController = navController,
