@@ -1,11 +1,6 @@
 package com.mudhut.software.justiceapp.utils
 
-import android.content.Context
-import android.content.ContextWrapper
 import com.mudhut.software.justiceapp.navigation.Destination
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
 
 enum class UserType(val label: String) {
     CITIZEN("Citizen"),
@@ -26,27 +21,6 @@ fun getUserTypes(): List<UserType> {
         UserType.PARALEGAL
     )
 }
-
-fun getUserType(value: String): UserType? {
-    val map = UserType.values().associateBy(UserType::label)
-    return map[value]
-}
-
-fun getCameraOutputDirectory(context: Context): File {
-    val contextWrapper = ContextWrapper(context)
-    val directory = contextWrapper.getDir("JusticeApp", Context.MODE_PRIVATE)
-
-    val fileNameFormat = "yyyy-MM-dd-HH-mm-ss-SSS"
-
-    return File(
-        directory,
-        SimpleDateFormat(
-            fileNameFormat,
-            Locale.US
-        ).format(System.currentTimeMillis())
-    ).apply { mkdir() }
-}
-
 
 fun getDestinationType(currentDestination: String?): Destination? {
     return when (currentDestination) {

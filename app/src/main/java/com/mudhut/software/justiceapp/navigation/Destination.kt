@@ -12,7 +12,7 @@ sealed class Destination(val route: String, val type: DestinationType? = null) {
 
     object HomeScreen : Destination(HOME_SCREEN, DestinationType.DASHBOARD)
     object ExploreScreen : Destination(EXPLORE_SCREEN, DestinationType.DASHBOARD)
-    object CreateScreen : Destination(CREATE_SCREEN, DestinationType.DASHBOARD)
+    object CreateScreen : Destination(CREATE_SCREEN)
     object InboxScreen : Destination(NOTIFICATION_SCREEN, DestinationType.DASHBOARD)
     object SettingsScreen : Destination(PROFILE_SCREEN, DestinationType.DASHBOARD)
 
