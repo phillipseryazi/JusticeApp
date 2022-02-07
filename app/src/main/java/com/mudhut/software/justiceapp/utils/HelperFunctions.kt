@@ -32,3 +32,20 @@ fun getDestinationType(currentDestination: String?): Destination? {
         else -> null
     }
 }
+
+fun checkString(string: String): Int {
+    val imgRegex = """image""".toRegex()
+    val vidRegex = """video""".toRegex()
+
+    return when {
+        imgRegex.containsMatchIn(string) -> {
+            1
+        }
+        vidRegex.containsMatchIn(string) -> {
+            2
+        }
+        else -> {
+            0
+        }
+    }
+}

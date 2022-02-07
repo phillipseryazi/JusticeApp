@@ -1,6 +1,8 @@
 package com.mudhut.software.justiceapp.ui.dashboard.views
 
 import android.net.Uri
+import android.util.Log
+import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -18,12 +20,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.ui.PlayerView
 import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.ui.dashboard.viewmodels.CreateScreenUiState
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
+import com.mudhut.software.justiceapp.utils.checkString
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
@@ -73,10 +82,11 @@ fun CreateScreen(
                 .padding(start = 16.dp)
         ) {
             items(items = uiState.uris) { item ->
-                MediaCard(image = item,
+                MediaCard(uri = item,
                     removeMedia = {
                         removeItemFromMediaList(item)
                     })
+                Log.d("Uri", item.path.toString())
             }
         }
         Spacer(
@@ -157,11 +167,14 @@ fun OpenGalleryButton(
 
 
 @Composable
-fun MediaCard(image: Uri, removeMedia: () -> Unit) {
+fun MediaCard(uri: Uri, removeMedia: () -> Unit) {
     Box(
         modifier = Modifier.size(200.dp, 300.dp)
     ) {
-        ImageComposable(media = image, removeMedia = removeMedia)
+        when (checkString(uri.toString())) {
+            1 -> ImageComposable(media = uri, removeMedia = removeMedia)
+            2 -> VideoComposable(media = uri, removeMedia = removeMedia)
+        }
     }
 }
 
@@ -182,24 +195,13 @@ fun ImageComposable(media: Uri, removeMedia: () -> Unit) {
                 modifier = Modifier.clip(RoundedCornerShape(12.dp))
             )
 
-            Button(
-                shape = CircleShape,
+            RemoveMediaButton(
                 modifier = Modifier
                     .size(40.dp)
                     .align(Alignment.TopEnd)
                     .padding(top = 8.dp, end = 8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color.Black
-                ),
-                contentPadding = PaddingValues(0.dp),
-                onClick = removeMedia
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_close),
-                    tint = Color.White,
-                    contentDescription = null
-                )
-            }
+                removeMedia
+            )
         }
 
     }
@@ -207,14 +209,113 @@ fun ImageComposable(media: Uri, removeMedia: () -> Unit) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun VideoComposable() {
+fun VideoComposable(media: Uri, removeMedia: () -> Unit) {
+    val context = LocalContext.current
+
+    var isPlaying by remember {
+        mutableStateOf(false)
+    }
+
+    val player = remember {
+        ExoPlayer.Builder(context).build().apply {
+            this.prepare()
+            this.repeatMode = Player.REPEAT_MODE_ONE
+        }
+    }
+
     Surface(
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(1.dp, Color.White),
-        color = Color.Black,
-        onClick = {}
+        color = Color.Black
     ) {
+        Box(modifier = Modifier.clip(RoundedCornerShape(12.dp))) {
+            DisposableEffect(
+                AndroidView(factory = { context ->
+                    val videoPlayer = PlayerView(context).apply {
+                        useController = false
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                    }
 
+                    videoPlayer.player = player
+
+                    player.setMediaItem(MediaItem.fromUri(media))
+
+                    videoPlayer
+                })
+            ) {
+                onDispose { player.release() }
+            }
+
+            RemoveMediaButton(
+                modifier = Modifier
+                    .size(40.dp)
+                    .align(Alignment.TopEnd)
+                    .padding(top = 8.dp, end = 8.dp),
+                removeMedia
+            )
+
+            PlayPauseButton(
+                modifier = Modifier
+                    .size(50.dp)
+                    .align(Alignment.Center),
+                isPlaying = isPlaying,
+                onButtonClick = {
+                    if (player.isPlaying) {
+                        isPlaying = false
+                        player.pause()
+                    } else {
+                        isPlaying = true
+                        player.play()
+                    }
+                })
+        }
+    }
+}
+
+@Composable
+fun RemoveMediaButton(modifier: Modifier, removeMedia: () -> Unit) {
+    Button(
+        shape = CircleShape,
+        modifier = modifier,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color.Black
+        ),
+        contentPadding = PaddingValues(0.dp),
+        onClick = removeMedia
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_close),
+            tint = Color.White,
+            contentDescription = null
+        )
+    }
+}
+
+@Composable
+fun PlayPauseButton(
+    modifier: Modifier,
+    isPlaying: Boolean,
+    onButtonClick: () -> Unit
+) {
+    Button(
+        shape = CircleShape,
+        modifier = modifier,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = if (isPlaying) Color.Transparent else Color.Blue
+        ),
+        contentPadding = PaddingValues(0.dp),
+        elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
+        onClick = onButtonClick
+    ) {
+        Icon(
+            painter = if (isPlaying) painterResource(id = R.drawable.ic_pause)
+            else painterResource(id = R.drawable.ic_play),
+            tint = Color.White,
+            contentDescription = null
+        )
     }
 }
 
