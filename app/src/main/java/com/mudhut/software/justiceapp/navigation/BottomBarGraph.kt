@@ -3,12 +3,15 @@ package com.mudhut.software.justiceapp.navigation
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.compose.runtime.collectAsState
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mudhut.software.justiceapp.ui.camera.views.CameraScreen
+import com.mudhut.software.justiceapp.ui.dashboard.viewmodels.CreateScreenViewModel
 import com.mudhut.software.justiceapp.ui.dashboard.views.*
 
 @ExperimentalPermissionsApi
@@ -24,7 +27,16 @@ fun NavGraphBuilder.bottomBarGraph(navController: NavController) {
                 ExploreScreen()
             }
             composable(Destination.CreateScreen.route) {
-                CreateScreen()
+                val viewModel = hiltViewModel<CreateScreenViewModel>()
+                CreateScreen(
+                    addItemToMediaList = {
+                        viewModel.addUriToMediaList(it)
+                    },
+                    removeItemFromMediaList = {
+                        viewModel.removeUriFromMediaList(it)
+                    },
+                    uiState = viewModel.uiState.collectAsState().value
+                )
             }
             composable(Destination.InboxScreen.route) {
                 InboxScreen()
