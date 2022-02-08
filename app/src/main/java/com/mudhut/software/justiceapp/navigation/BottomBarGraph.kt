@@ -35,6 +35,10 @@ fun NavGraphBuilder.bottomBarGraph(navController: NavController) {
                     removeItemFromMediaList = {
                         viewModel.removeUriFromMediaList(it)
                     },
+                    onPopBackStack = {
+                        navController.popBackStack()
+                    },
+                    onPostClick = {},
                     uiState = viewModel.uiState.collectAsState().value
                 )
             }

@@ -8,7 +8,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
 data class CreateScreenUiState(
-    val uris: List<Uri> = mutableStateListOf()
+    val uris: List<Uri> = mutableStateListOf(),
+    var caption: String = "",
+    var error: String = ""
 )
 
 @HiltViewModel
@@ -33,4 +35,14 @@ class CreateScreenViewModel @Inject constructor() : ViewModel() {
         uiState.value = uiState.value.copy(uris = mediaList)
     }
 
+    fun postItem() {
+        if (uiState.value.uris.isEmpty() && uiState.value.caption.trim().isEmpty()) {
+            uiState.value = uiState.value.copy(error = "Can't upload empty post")
+        }
+
+        if (uiState.value.caption.trim().isEmpty()) {
+            uiState.value = uiState.value.copy(error = "Please add a caption.")
+        }
+
+    }
 }

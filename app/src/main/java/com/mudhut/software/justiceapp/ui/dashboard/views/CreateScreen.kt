@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -39,6 +40,8 @@ import com.skydoves.landscapist.glide.GlideImage
 fun CreateScreen(
     addItemToMediaList: (list: List<Uri>) -> Unit,
     removeItemFromMediaList: (uri: Uri) -> Unit,
+    onPopBackStack: () -> Unit,
+    onPostClick: () -> Unit,
     uiState: CreateScreenUiState
 ) {
     var caption by remember {
@@ -57,10 +60,17 @@ fun CreateScreen(
             .fillMaxSize()
             .background(color = Color.White)
     ) {
+        TopBarSection(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            onPopBackStack = onPopBackStack,
+            onPostClick = onPostClick
+        )
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(32.dp)
+                .height(18.dp)
         )
         CaptionSection(
             modifier = Modifier
@@ -112,6 +122,50 @@ fun CreateScreen(
                 onButtonClick = {
                     mediaLauncher.launch("video/*")
                 })
+        }
+    }
+}
+
+@Composable
+fun TopBarSection(modifier: Modifier, onPopBackStack: () -> Unit, onPostClick: () -> Unit) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
+        Button(
+            modifier = Modifier
+                .size(50.dp)
+                .padding(start = 8.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Transparent
+            ),
+            elevation = ButtonDefaults.elevation(
+                defaultElevation = 0.dp
+            ),
+            contentPadding = PaddingValues(0.dp),
+            onClick = onPopBackStack
+        ) {
+            Icon(
+                modifier = Modifier.size(ButtonDefaults.IconSize * 2),
+                painter = painterResource(id = R.drawable.ic_close),
+                tint = Color.Blue,
+                contentDescription = null
+            )
+        }
+        Button(
+            modifier = Modifier.padding(end = 16.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Blue
+            ),
+            shape = RoundedCornerShape(8.dp),
+            elevation = ButtonDefaults.elevation(
+                defaultElevation = 0.dp
+            ),
+            onClick = onPostClick
+        ) {
+            Text(
+                text = "POST",
+                color = Color.White,
+                style = MaterialTheme.typography.body1,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
@@ -203,7 +257,6 @@ fun ImageComposable(media: Uri, removeMedia: () -> Unit) {
                 removeMedia
             )
         }
-
     }
 }
 
@@ -264,10 +317,10 @@ fun VideoComposable(media: Uri, removeMedia: () -> Unit) {
                 isPlaying = isPlaying,
                 onButtonClick = {
                     if (player.isPlaying) {
-                        isPlaying = false
+                        isPlaying = !isPlaying
                         player.pause()
                     } else {
-                        isPlaying = true
+                        isPlaying = !isPlaying
                         player.play()
                     }
                 })
@@ -326,6 +379,8 @@ fun MediaCardPreview() {
         CreateScreen(
             addItemToMediaList = {},
             removeItemFromMediaList = {},
+            onPopBackStack = {},
+            onPostClick = {},
             uiState = CreateScreenUiState()
         )
     }
