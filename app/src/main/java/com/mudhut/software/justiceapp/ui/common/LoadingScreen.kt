@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.mudhut.software.justiceapp.R
 
 @Composable
-fun LoadingPage() {
+fun LoadingScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -36,5 +36,5 @@ fun LoadingPage() {
 @Preview
 @Composable
 fun LoadingPagePreview() {
-    LoadingPage()
+    LoadingScreen()
 }

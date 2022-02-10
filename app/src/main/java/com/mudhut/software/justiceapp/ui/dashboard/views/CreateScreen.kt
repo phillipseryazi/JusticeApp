@@ -32,6 +32,7 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerView
 import com.mudhut.software.justiceapp.R
+import com.mudhut.software.justiceapp.ui.common.LoadingScreen
 import com.mudhut.software.justiceapp.ui.dashboard.viewmodels.CreateScreenUiState
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 import com.mudhut.software.justiceapp.utils.checkString
@@ -63,73 +64,77 @@ fun CreateScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.White)
-    ) {
-        TopBarSection(
+    if (uiState.isLoading) {
+        LoadingScreen()
+    } else {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            onPopBackStack = onPopBackStack,
-            onPostClick = onPostClick
-        )
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(18.dp)
-        )
-        CaptionSection(
-            modifier = Modifier
-                .background(color = Color.Transparent)
-                .padding(start = 32.dp, end = 32.dp)
-                .fillMaxWidth(),
-            caption = uiState.caption ?: "",
-            onCaptionChange = onCaptionChange
-        )
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(12.dp)
-        )
-        LazyRow(
-            state = rememberLazyListState(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp)
+                .fillMaxSize()
+                .background(color = Color.White)
         ) {
-            items(items = uiState.uris) { item ->
-                MediaCard(uri = item,
-                    removeMedia = {
-                        removeItemFromMediaList(item)
-                    })
-                Log.d("Uri", item.path.toString())
+            TopBarSection(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                onPopBackStack = onPopBackStack,
+                onPostClick = onPostClick
+            )
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(18.dp)
+            )
+            CaptionSection(
+                modifier = Modifier
+                    .background(color = Color.Transparent)
+                    .padding(start = 32.dp, end = 32.dp)
+                    .fillMaxWidth(),
+                caption = uiState.caption ?: "",
+                onCaptionChange = onCaptionChange
+            )
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(12.dp)
+            )
+            LazyRow(
+                state = rememberLazyListState(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp)
+            ) {
+                items(items = uiState.uris) { item ->
+                    MediaCard(uri = item,
+                        removeMedia = {
+                            removeItemFromMediaList(item)
+                        })
+                    Log.d("Uri", item.path.toString())
+                }
             }
-        }
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(12.dp)
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OpenGalleryButton(
-                modifier = Modifier.size(50.dp),
-                icon = R.drawable.ic_camera,
-                onButtonClick = {
-                    mediaLauncher.launch("image/*")
-                })
-            OpenGalleryButton(
-                modifier = Modifier.size(50.dp),
-                icon = R.drawable.ic_videocam,
-                onButtonClick = {
-                    mediaLauncher.launch("video/*")
-                })
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(12.dp)
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OpenGalleryButton(
+                    modifier = Modifier.size(50.dp),
+                    icon = R.drawable.ic_camera,
+                    onButtonClick = {
+                        mediaLauncher.launch("image/*")
+                    })
+                OpenGalleryButton(
+                    modifier = Modifier.size(50.dp),
+                    icon = R.drawable.ic_videocam,
+                    onButtonClick = {
+                        mediaLauncher.launch("video/*")
+                    })
+            }
         }
     }
 }
