@@ -1,10 +1,6 @@
 package com.mudhut.software.justiceapp.utils
 
-import android.content.Context
-import android.content.ContextWrapper
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
+import com.mudhut.software.justiceapp.navigation.Destination
 
 enum class UserType(val label: String) {
     CITIZEN("Citizen"),
@@ -26,22 +22,30 @@ fun getUserTypes(): List<UserType> {
     )
 }
 
-fun getUserType(value: String): UserType? {
-    val map = UserType.values().associateBy(UserType::label)
-    return map[value]
+fun getDestinationType(currentDestination: String?): Destination? {
+    return when (currentDestination) {
+        Destination.HomeScreen.route -> Destination.HomeScreen
+        Destination.ExploreScreen.route -> Destination.ExploreScreen
+        Destination.CreateScreen.route -> Destination.CreateScreen
+        Destination.InboxScreen.route -> Destination.InboxScreen
+        Destination.SettingsScreen.route -> Destination.SettingsScreen
+        else -> null
+    }
 }
 
-fun getCameraOutputDirectory(context: Context): File {
-    val contextWrapper = ContextWrapper(context)
-    val directory = contextWrapper.getDir("JusticeApp", Context.MODE_PRIVATE)
+fun checkString(string: String): Int {
+    val imgRegex = """image""".toRegex()
+    val vidRegex = """video""".toRegex()
 
-    val fileNameFormat = "yyyy-MM-dd-HH-mm-ss-SSS"
-
-    return File(
-        directory,
-        SimpleDateFormat(
-            fileNameFormat,
-            Locale.US
-        ).format(System.currentTimeMillis())
-    ).apply { mkdir() }
+    return when {
+        imgRegex.containsMatchIn(string) -> {
+            1
+        }
+        vidRegex.containsMatchIn(string) -> {
+            2
+        }
+        else -> {
+            0
+        }
+    }
 }

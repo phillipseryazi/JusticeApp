@@ -1,14 +1,22 @@
 package com.mudhut.software.justiceapp.navigation
 
-sealed class Destination(val route: String) {
+enum class DestinationType {
+    DASHBOARD
+}
+
+sealed class Destination(val route: String, val type: DestinationType? = null) {
     object LoginScreen : Destination(LOGIN_SCREEN)
     object OnBoardingScreen : Destination(ONBOARDING_SCREEN)
     object RegistrationScreen : Destination(REGISTRATION_SCREEN)
     object DashboardScreen : Destination(DASHBOARD_SCREEN)
 
-    object HomeScreen : Destination(HOME_SCREEN)
-    object NotificationScreen : Destination(NOTIFICATION_SCREEN)
-    object ProfileScreen : Destination(PROFILE_SCREEN)
+    object HomeScreen : Destination(HOME_SCREEN, DestinationType.DASHBOARD)
+    object ExploreScreen : Destination(EXPLORE_SCREEN, DestinationType.DASHBOARD)
+    object CreateScreen : Destination(CREATE_SCREEN)
+    object InboxScreen : Destination(NOTIFICATION_SCREEN, DestinationType.DASHBOARD)
+    object SettingsScreen : Destination(PROFILE_SCREEN, DestinationType.DASHBOARD)
+
+
     object CameraScreen : Destination(CAMERA_SCREEN)
 
     companion object {
@@ -20,8 +28,12 @@ sealed class Destination(val route: String) {
 
         // BottomBar routes
         private const val HOME_SCREEN = "home_screen"
+        private const val EXPLORE_SCREEN = "explore_screen"
+        private const val CREATE_SCREEN = "create_screen"
         private const val NOTIFICATION_SCREEN = "notification_screen"
         private const val PROFILE_SCREEN = "profile_screen"
+
+        // Camera route
         private const val CAMERA_SCREEN = "camera_screen"
 
     }

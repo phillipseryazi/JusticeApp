@@ -320,7 +320,7 @@ class AuthenticationViewModel @Inject constructor(
                         datastore.writeToDataStore("Avatar", it.data?.avatar ?: "")
                     }
                     is Resource.Error -> {
-                        Log.e("Profile", it.message ?: "Unknown error")
+                        Log.e("UserProfile", it.message ?: "Unknown error")
                     }
                 }
             }

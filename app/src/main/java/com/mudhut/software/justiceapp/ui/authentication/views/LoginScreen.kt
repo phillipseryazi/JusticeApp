@@ -24,7 +24,7 @@ import com.mudhut.software.justiceapp.ui.authentication.viewmodels.AuthUiState
 import com.mudhut.software.justiceapp.ui.authentication.viewmodels.FocusedTextField
 import com.mudhut.software.justiceapp.ui.authentication.viewmodels.FormErrorType
 import com.mudhut.software.justiceapp.ui.common.ErrorBanner
-import com.mudhut.software.justiceapp.ui.common.LoadingPage
+import com.mudhut.software.justiceapp.ui.common.LoadingScreen
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 
 @Composable
@@ -65,7 +65,7 @@ fun LoginScreen(
         scaffoldState = scaffoldState
     ) {
         if (uiState.isLoading) {
-            LoadingPage()
+            LoadingScreen()
         } else {
             Column(
                 modifier = Modifier.fillMaxSize()

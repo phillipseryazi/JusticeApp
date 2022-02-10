@@ -41,10 +41,8 @@ import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.ui.common.GoToSettingsComposable
 import com.mudhut.software.justiceapp.ui.common.PermissionsComposable
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
-import com.mudhut.software.justiceapp.utils.FILENAME_FORMAT
+import com.mudhut.software.justiceapp.utils.FILENAME
 import com.mudhut.software.justiceapp.utils.INITIAL_ELAPSED_TIME
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 
@@ -91,8 +89,9 @@ fun CameraComposable(modifier: Modifier) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
 
-    val name = "justice-app-recording-" + SimpleDateFormat(FILENAME_FORMAT, Locale.US)
-        .format(System.currentTimeMillis()) + ".mp4"
+    val videoName = "$FILENAME.mp4"
+
+    val imageName = "$FILENAME.jpg"
 
     val elapsedTime = remember {
         mutableStateOf(INITIAL_ELAPSED_TIME)
@@ -134,7 +133,7 @@ fun CameraComposable(modifier: Modifier) {
 
     val videoOutputOptions = remember {
         val contentValues = ContentValues().apply {
-            put(MediaStore.Video.Media.DISPLAY_NAME, name)
+            put(MediaStore.Video.Media.DISPLAY_NAME, videoName)
         }
 
         MediaStoreOutputOptions.Builder(
@@ -149,10 +148,10 @@ fun CameraComposable(modifier: Modifier) {
 
     val imageOutputOptions = remember {
         val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            put(MediaStore.MediaColumns.DISPLAY_NAME, imageName)
+//            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/justice-app-image-")
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/JusticeApp")
             }
         }
 

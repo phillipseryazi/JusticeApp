@@ -12,7 +12,6 @@ import javax.inject.Inject
 class AuthenticationRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth
 ) : IAuthenticationRepository {
-
     override fun emailPasswordRegistration(email: String, password: String) = flow {
         emit(Resource.Loading())
         firebaseAuth.createUserWithEmailAndPassword(email, password).await()

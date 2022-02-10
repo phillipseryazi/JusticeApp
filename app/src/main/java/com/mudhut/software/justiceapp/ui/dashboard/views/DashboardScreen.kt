@@ -4,10 +4,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -23,9 +19,11 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.navigation.Destination
+import com.mudhut.software.justiceapp.navigation.DestinationType
 import com.mudhut.software.justiceapp.navigation.bottomBarGraph
 import com.mudhut.software.justiceapp.ui.dashboard.models.BottomNavItem
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
+import com.mudhut.software.justiceapp.utils.getDestinationType
 
 @ExperimentalPermissionsApi
 @Composable
@@ -40,30 +38,37 @@ fun DashboardScreen() {
         modifier = Modifier.fillMaxSize(),
         scaffoldState = scaffoldState,
         bottomBar = {
-            if (currentDestination == Destination.HomeScreen.route ||
-                currentDestination == Destination.NotificationScreen.route ||
-                currentDestination == Destination.ProfileScreen.route
-            ) {
+            if (getDestinationType(currentDestination)?.type == DestinationType.DASHBOARD) {
                 BottomNavigationBar(
                     navItems = listOf(
                         BottomNavItem(
                             name = "Home",
                             route = Destination.HomeScreen.route,
-                            icon = Icons.Filled.Home
+                            icon = R.drawable.ic_home
                         ),
                         BottomNavItem(
-                            name = "Notifications",
-                            route = Destination.NotificationScreen.route,
-                            icon = Icons.Filled.Email
+                            name = "Find",
+                            route = Destination.ExploreScreen.route,
+                            icon = R.drawable.ic_explore
                         ),
                         BottomNavItem(
-                            name = "Profile",
-                            route = Destination.ProfileScreen.route,
-                            icon = Icons.Filled.Person
+                            name = "Post",
+                            route = Destination.CreateScreen.route,
+                            icon = R.drawable.ic_add
+                        ),
+                        BottomNavItem(
+                            name = "Inbox",
+                            route = Destination.InboxScreen.route,
+                            icon = R.drawable.ic_email
+                        ),
+                        BottomNavItem(
+                            name = "Settings",
+                            route = Destination.SettingsScreen.route,
+                            icon = R.drawable.ic_settings
                         )
                     ),
                     navController = navController,
-                    currentDestination = currentDestination,
+                    currentDestination = currentDestination ?: Destination.HomeScreen.route,
                     modifier = Modifier
                         .padding(
                             start = 0.dp,
@@ -73,10 +78,7 @@ fun DashboardScreen() {
             }
         },
         floatingActionButton = {
-            if (currentDestination == Destination.HomeScreen.route ||
-                currentDestination == Destination.NotificationScreen.route ||
-                currentDestination == Destination.ProfileScreen.route
-            ) {
+            if (getDestinationType(currentDestination)?.type == DestinationType.DASHBOARD) {
                 FloatingActionButton(
                     shape = CircleShape,
                     contentColor = Color.White,
@@ -119,7 +121,12 @@ fun BottomNavigationBar(
                 selected = currentDestination == screen.route,
                 selectedContentColor = MaterialTheme.colors.secondaryVariant,
                 unselectedContentColor = Color.White,
-                icon = { screen.icon?.let { Icon(it, contentDescription = null) } },
+                icon = {
+                    Icon(
+                        painter = painterResource(screen.icon),
+                        contentDescription = null
+                    )
+                },
                 onClick = {
                     navController.navigate(screen.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
