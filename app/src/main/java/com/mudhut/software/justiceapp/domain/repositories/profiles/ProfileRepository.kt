@@ -24,6 +24,7 @@ class ProfileRepository @Inject constructor(
         avatar: String
     ) = flow {
         emit(Resource.Loading())
+
         val userMap = mutableMapOf(
             "username" to username,
             "email" to email,
@@ -32,14 +33,18 @@ class ProfileRepository @Inject constructor(
             "avatar" to avatar,
             "isVerified" to false
         )
+
         firebaseAuth.uid?.let {
             firestore.collection("profiles").document(it).set(userMap).await()
         }
+
         val profile = firebaseAuth.uid?.let {
             firestore.collection("profiles").document(it).get().await()
                 .toObject(Profile::class.java)
         }
+
         emit(Resource.Success(data = profile))
+
     }.catch {
         emit(Resource.Error(data = null, message = it.localizedMessage ?: "Unknown error"))
     }.flowOn(Dispatchers.IO)

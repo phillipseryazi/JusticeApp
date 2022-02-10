@@ -1,8 +1,9 @@
 package com.mudhut.software.justiceapp.di
 
-import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,10 +15,13 @@ import javax.inject.Singleton
 object FirebaseModule {
     @Singleton
     @Provides
-    fun providesFirebaseAuth() = FirebaseAuth.getInstance()
+    fun providesFirebaseAuth() = Firebase.auth
 
     @Singleton
     @Provides
     fun providesFirebaseFirestore() = Firebase.firestore
 
+    @Singleton
+    @Provides
+    fun providesFirebaseStorage() = Firebase.storage
 }

@@ -1,6 +1,7 @@
 package com.mudhut.software.justiceapp.di
 
 import android.content.Context
+import androidx.work.WorkManager
 import com.mudhut.software.justiceapp.data.datastore.ProfileDatastoreManager
 import dagger.Module
 import dagger.Provides
@@ -16,5 +17,8 @@ object AppModule {
     @Provides
     fun providesProfileDatastoreManager(@ApplicationContext context: Context) =
         ProfileDatastoreManager(context)
+
+    @Provides
+    fun providesWorkManager(@ApplicationContext context: Context) = WorkManager.getInstance(context)
 
 }

@@ -3,6 +3,7 @@ package com.mudhut.software.justiceapp.ui.dashboard.views
 import android.net.Uri
 import android.util.Log
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -40,13 +41,13 @@ import com.skydoves.landscapist.glide.GlideImage
 fun CreateScreen(
     addItemToMediaList: (list: List<Uri>) -> Unit,
     removeItemFromMediaList: (uri: Uri) -> Unit,
+    onCaptionChange: (String) -> Unit,
     onPopBackStack: () -> Unit,
     onPostClick: () -> Unit,
+    resetMessage: () -> Unit,
     uiState: CreateScreenUiState
 ) {
-    var caption by remember {
-        mutableStateOf("")
-    }
+    val context = LocalContext.current
 
     val mediaLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents(),
@@ -54,6 +55,13 @@ fun CreateScreen(
             addItemToMediaList(it)
         }
     )
+
+    LaunchedEffect(uiState.message) {
+        uiState.message?.let {
+            Toast.makeText(context, uiState.message, Toast.LENGTH_LONG).show()
+            resetMessage()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -77,8 +85,8 @@ fun CreateScreen(
                 .background(color = Color.Transparent)
                 .padding(start = 32.dp, end = 32.dp)
                 .fillMaxWidth(),
-            caption = caption,
-            onValueChanged = { caption = it }
+            caption = uiState.caption ?: "",
+            onCaptionChange = onCaptionChange
         )
         Spacer(
             modifier = Modifier
@@ -174,7 +182,7 @@ fun TopBarSection(modifier: Modifier, onPopBackStack: () -> Unit, onPostClick: (
 fun CaptionSection(
     modifier: Modifier,
     caption: String,
-    onValueChanged: (String) -> Unit
+    onCaptionChange: (String) -> Unit
 ) {
     TextField(
         label = {
@@ -191,7 +199,7 @@ fun CaptionSection(
         modifier = modifier,
         singleLine = false,
         value = caption,
-        onValueChange = onValueChanged
+        onValueChange = onCaptionChange
     )
 }
 
@@ -379,8 +387,10 @@ fun MediaCardPreview() {
         CreateScreen(
             addItemToMediaList = {},
             removeItemFromMediaList = {},
+            onCaptionChange = {},
             onPopBackStack = {},
             onPostClick = {},
+            resetMessage = {},
             uiState = CreateScreenUiState()
         )
     }

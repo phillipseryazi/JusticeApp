@@ -11,7 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mudhut.software.justiceapp.ui.camera.views.CameraScreen
-import com.mudhut.software.justiceapp.ui.dashboard.viewmodels.CreateScreenViewModel
+import com.mudhut.software.justiceapp.ui.dashboard.viewmodels.PostsViewModel
 import com.mudhut.software.justiceapp.ui.dashboard.views.*
 
 @ExperimentalPermissionsApi
@@ -27,7 +27,7 @@ fun NavGraphBuilder.bottomBarGraph(navController: NavController) {
                 ExploreScreen()
             }
             composable(Destination.CreateScreen.route) {
-                val viewModel = hiltViewModel<CreateScreenViewModel>()
+                val viewModel = hiltViewModel<PostsViewModel>()
                 CreateScreen(
                     addItemToMediaList = {
                         viewModel.addUriToMediaList(it)
@@ -35,10 +35,18 @@ fun NavGraphBuilder.bottomBarGraph(navController: NavController) {
                     removeItemFromMediaList = {
                         viewModel.removeUriFromMediaList(it)
                     },
+                    onCaptionChange = {
+                        viewModel.onCaptionChange(it)
+                    },
                     onPopBackStack = {
                         navController.popBackStack()
                     },
-                    onPostClick = {},
+                    onPostClick = {
+                        viewModel.postItem()
+                    },
+                    resetMessage = {
+                        viewModel.resetMessage()
+                    },
                     uiState = viewModel.uiState.collectAsState().value
                 )
             }
