@@ -7,4 +7,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface IPostRepository {
     fun createPost(post: Post): Flow<Resource<CreatePostResponse>>
+    fun getPosts(): Flow<Resource<List<Post>>>
 }

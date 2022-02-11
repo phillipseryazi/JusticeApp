@@ -1,15 +1,23 @@
 package com.mudhut.software.justiceapp.ui.dashboard.views
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Text
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun HomeScreen() {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text("Home Screen")
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        
     }
+}
+
+@Composable
+fun HomeScreenItemComposable(modifier: Modifier) {
+
 }

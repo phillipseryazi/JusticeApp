@@ -9,6 +9,7 @@ import com.mudhut.software.justiceapp.data.models.Post
 import com.mudhut.software.justiceapp.utils.Resource
 import com.mudhut.software.justiceapp.utils.Response
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -24,7 +25,7 @@ class PostRepository @Inject constructor(
 ) : IPostRepository {
     private val downloadUrls = mutableListOf<String>()
 
-    private suspend fun uploadImage(uri: Uri, userId: String): Uri {
+    private suspend fun uploadMedia(uri: Uri, userId: String): Uri {
         return withContext(Dispatchers.IO) {
             val reference = storage
                 .getReference("media/$userId")
@@ -43,7 +44,7 @@ class PostRepository @Inject constructor(
 
         post.media.forEach {
             val url = firebaseAuth.currentUser?.uid?.let { uid ->
-                uploadImage(it, uid)
+                uploadMedia(it, uid)
             }
 
             if (url != null) {
@@ -69,6 +70,18 @@ class PostRepository @Inject constructor(
         emit(
             Resource.Error(
                 data = CreatePostResponse(Response.FAILED),
+                message = it.localizedMessage ?: "Unknown error"
+            )
+        )
+    }.flowOn(Dispatchers.IO)
+
+    override fun getPosts(): Flow<Resource<List<Post>>> = flow<Resource<List<Post>>> {
+        emit(Resource.Loading())
+        emit(Resource.Success(data = listOf()))
+    }.catch {
+        emit(
+            Resource.Error(
+                data = null,
                 message = it.localizedMessage ?: "Unknown error"
             )
         )

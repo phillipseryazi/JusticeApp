@@ -25,7 +25,7 @@ data class CreateScreenUiState(
 )
 
 @HiltViewModel
-class PostsViewModel @Inject constructor(
+class CreateScreenViewModel @Inject constructor(
     private val createPostUseCase: CreatePostUseCase
 ) : ViewModel() {
 
