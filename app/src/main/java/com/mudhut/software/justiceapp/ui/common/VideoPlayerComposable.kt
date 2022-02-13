@@ -4,9 +4,7 @@ import android.net.Uri
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,11 +18,13 @@ import com.google.android.exoplayer2.ui.PlayerView
 @Composable
 fun VideoPlayerComposable(
     modifier: Modifier,
-    media: Uri,
-    isPlaying: Boolean,
-    onPlayPauseButtonClicked: () -> Unit
+    media: Uri
 ) {
     val context = LocalContext.current
+
+    var isPlaying by remember {
+        mutableStateOf(false)
+    }
 
     val player = remember {
         ExoPlayer.Builder(context).build().apply {
@@ -60,12 +60,12 @@ fun VideoPlayerComposable(
                 .align(Alignment.Center),
             isPlaying = isPlaying,
             onButtonClick = {
-                if (player.isPlaying) {
+                isPlaying = if (player.isPlaying) {
                     player.pause()
-                    onPlayPauseButtonClicked()
+                    !isPlaying
                 } else {
                     player.play()
-                    onPlayPauseButtonClicked()
+                    !isPlaying
                 }
             })
     }

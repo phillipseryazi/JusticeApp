@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,24 +42,20 @@ fun HomeScreenItemComposable(
     modifier: Modifier,
     post: Post
 ) {
-    var isPlaying by remember {
-        mutableStateOf(false)
-    }
-
     val pagerState = rememberPagerState()
 
     Box(modifier = modifier) {
         HorizontalPager(count = post.media.size, state = pagerState) { page ->
-
             when (checkString(post.media[page].toString())) {
-                1 -> ImageViewerComposable(media = post.media[page])
+                1 -> ImageViewerComposable(
+                    modifier = modifier,
+                    media = post.media[page]
+                )
                 2 -> VideoPlayerComposable(
                     modifier = modifier,
-                    media = post.media[page],
-                    isPlaying = isPlaying,
-                    onPlayPauseButtonClicked = { isPlaying = !isPlaying })
+                    media = post.media[page]
+                )
             }
-
         }
 
         HomeScreenInteractionSection(
