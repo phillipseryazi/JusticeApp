@@ -73,8 +73,9 @@ fun DashboardScreen() {
                         .padding(
                             start = 0.dp,
                             end = 0.dp
-                        )
-                )
+                        ),
+
+                    )
             }
         },
         floatingActionButton = {
@@ -114,6 +115,8 @@ fun BottomNavigationBar(
 ) {
     BottomNavigation(
         modifier = modifier,
+        backgroundColor = Color.Transparent,
+        elevation = 0.dp
     ) {
         navItems.forEach { screen ->
             BottomNavigationItem(

@@ -1,6 +1,5 @@
 package com.mudhut.software.justiceapp.ui.common
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
@@ -10,7 +9,7 @@ import com.skydoves.landscapist.glide.GlideImage
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ImageViewerComposable(modifier: Modifier, media: Uri) {
+fun ImageViewerComposable(modifier: Modifier, media: String) {
     Box(
         modifier = modifier
     ) {

@@ -12,6 +12,7 @@ import androidx.navigation.navigation
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mudhut.software.justiceapp.ui.camera.views.CameraScreen
 import com.mudhut.software.justiceapp.ui.dashboard.viewmodels.CreateScreenViewModel
+import com.mudhut.software.justiceapp.ui.dashboard.viewmodels.HomeScreenViewModel
 import com.mudhut.software.justiceapp.ui.dashboard.views.*
 
 @ExperimentalPermissionsApi
@@ -21,7 +22,8 @@ fun NavGraphBuilder.bottomBarGraph(navController: NavController) {
         route = "bottom_bar_graph",
         builder = {
             composable(Destination.HomeScreen.route) {
-                HomeScreen()
+                val viewModel = hiltViewModel<HomeScreenViewModel>()
+                HomeScreen(viewModel.uiState.collectAsState().value)
             }
             composable(Destination.ExploreScreen.route) {
                 ExploreScreen()
@@ -29,8 +31,9 @@ fun NavGraphBuilder.bottomBarGraph(navController: NavController) {
             composable(Destination.CreateScreen.route) {
                 val viewModel = hiltViewModel<CreateScreenViewModel>()
                 CreateScreen(
-                    addItemToMediaList = {
-                        viewModel.addUriToMediaList(it)
+                    addItemToMediaList = { uri ->
+                        val strings = uri.map { it.toString() }
+                        viewModel.addUriToMediaList(strings)
                     },
                     removeItemFromMediaList = {
                         viewModel.removeUriFromMediaList(it)

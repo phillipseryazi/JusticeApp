@@ -1,6 +1,5 @@
 package com.mudhut.software.justiceapp.ui.dashboard.viewmodels
 
-import android.net.Uri
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,7 +17,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class CreateScreenUiState(
-    val uris: List<Uri> = mutableStateListOf(),
+    val uris: List<String> = mutableStateListOf(),
     var caption: String? = null,
     var message: String? = null,
     var isLoading: Boolean = false
@@ -32,16 +31,16 @@ class CreateScreenViewModel @Inject constructor(
     var uiState = MutableStateFlow(CreateScreenUiState())
         private set
 
-    private val mediaList = mutableStateListOf<Uri>()
+    private val mediaList = mutableStateListOf<String>()
 
-    fun addUriToMediaList(uris: List<Uri>) {
+    fun addUriToMediaList(uris: List<String>) {
         uris.forEach {
             mediaList.add(it)
             uiState.value = uiState.value.copy(uris = mediaList)
         }
     }
 
-    fun removeUriFromMediaList(uri: Uri) {
+    fun removeUriFromMediaList(uri: String) {
         if (uiState.value.uris.contains(uri)) {
             mediaList.remove(uri)
         }

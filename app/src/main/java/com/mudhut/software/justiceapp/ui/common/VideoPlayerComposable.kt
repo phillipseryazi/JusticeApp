@@ -18,7 +18,7 @@ import com.google.android.exoplayer2.ui.PlayerView
 @Composable
 fun VideoPlayerComposable(
     modifier: Modifier,
-    media: Uri
+    media: String
 ) {
     val context = LocalContext.current
 
