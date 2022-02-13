@@ -33,6 +33,7 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerView
 import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.ui.common.LoadingScreen
+import com.mudhut.software.justiceapp.ui.common.PlayPauseButton
 import com.mudhut.software.justiceapp.ui.dashboard.viewmodels.CreateScreenUiState
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 import com.mudhut.software.justiceapp.utils.checkString
@@ -360,30 +361,6 @@ fun RemoveMediaButton(modifier: Modifier, removeMedia: () -> Unit) {
     }
 }
 
-@Composable
-fun PlayPauseButton(
-    modifier: Modifier,
-    isPlaying: Boolean,
-    onButtonClick: () -> Unit
-) {
-    Button(
-        shape = CircleShape,
-        modifier = modifier,
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = if (isPlaying) Color.Transparent else Color.Blue
-        ),
-        contentPadding = PaddingValues(0.dp),
-        elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
-        onClick = onButtonClick
-    ) {
-        Icon(
-            painter = if (isPlaying) painterResource(id = R.drawable.ic_pause)
-            else painterResource(id = R.drawable.ic_play),
-            tint = Color.White,
-            contentDescription = null
-        )
-    }
-}
 
 @Preview
 @Composable

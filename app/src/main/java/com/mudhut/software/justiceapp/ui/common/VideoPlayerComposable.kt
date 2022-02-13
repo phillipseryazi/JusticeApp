@@ -16,7 +16,6 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerView
-import com.mudhut.software.justiceapp.ui.dashboard.views.PlayPauseButton
 
 @Composable
 fun VideoPlayerComposable(
