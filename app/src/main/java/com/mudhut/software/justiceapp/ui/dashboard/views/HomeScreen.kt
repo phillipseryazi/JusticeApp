@@ -19,8 +19,10 @@ import com.google.accompanist.pager.rememberPagerState
 import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.data.models.Post
 import com.mudhut.software.justiceapp.ui.common.ImageViewerComposable
+import com.mudhut.software.justiceapp.ui.common.VideoPlayerComposable
 import com.mudhut.software.justiceapp.ui.dashboard.viewmodels.HomeScreenUiState
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
+import com.mudhut.software.justiceapp.utils.checkString
 
 @Composable
 fun HomeScreen(
@@ -32,7 +34,7 @@ fun HomeScreen(
     ) {
         items(uiState.posts) {
             HomeScreenItemComposable(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillParentMaxSize(),
                 post = it
             )
         }
@@ -48,21 +50,21 @@ fun HomeScreenItemComposable(
     val pagerState = rememberPagerState()
 
     Box(modifier = modifier) {
-        HorizontalPager(count = post.media.size, state = pagerState) { page ->
-//            when (checkString(post.media[page].toString())) {
-//                1 -> ImageViewerComposable(
-//                    modifier = modifier,
-//                    media = post.media[page]
-//                )
-//                2 -> VideoPlayerComposable(
-//                    modifier = modifier,
-//                    media = post.media[page]
-//                )
-//            }
-            ImageViewerComposable(
-                modifier = modifier,
-                media = post.media[page]
-            )
+        HorizontalPager(
+            modifier = modifier,
+            count = post.media.size,
+            state = pagerState
+        ) { page ->
+            when (checkString(post.media[page])) {
+                1 -> ImageViewerComposable(
+                    modifier = modifier,
+                    media = post.media[page]
+                )
+                2 -> VideoPlayerComposable(
+                    modifier = modifier,
+                    media = post.media[page]
+                )
+            }
         }
 
         HomeScreenInteractionSection(

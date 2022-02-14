@@ -8,12 +8,14 @@ import com.mudhut.software.justiceapp.data.models.CreatePostResponse
 import com.mudhut.software.justiceapp.data.models.Post
 import com.mudhut.software.justiceapp.utils.Resource
 import com.mudhut.software.justiceapp.utils.Response
-import kotlinx.coroutines.*
+import com.mudhut.software.justiceapp.utils.checkString
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
@@ -23,31 +25,35 @@ class PostRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : IPostRepository {
 
-    private suspend fun uploadMedia(list: List<String>): List<String> {
-        val downloadUrls = mutableListOf<Deferred<String>>()
+    private val downloadUrls = mutableListOf<String>()
 
-        coroutineScope {
-            list.forEach {
-                val reference = storage
-                    .getReference("media/${firebaseAuth.currentUser?.uid}")
-                    .child(UUID.randomUUID().toString())
-
-                val downloadUrl = async {
-                    reference.putFile(Uri.parse(it)).await()
-                    reference.downloadUrl.await().toString()
-                }
-                downloadUrls.add(downloadUrl)
+    private suspend fun uploadImage(uri: String): Uri {
+        return withContext(Dispatchers.IO) {
+            val uuid = if (checkString(uri) == 1) {
+                "${UUID.randomUUID()}.jpg"
+            } else {
+                "${UUID.randomUUID()}.mp4"
             }
+
+            val reference = storage
+                .getReference("media/${firebaseAuth.currentUser?.uid}")
+                .child(uuid)
+
+            reference.putFile(Uri.parse(uri)).await()
+
+            reference.downloadUrl.await()
         }
-
-        return downloadUrls.awaitAll()
     }
-
 
     override fun createPost(post: Post) = flow {
         emit(Resource.Loading())
 
-        val downloadUrls = uploadMedia(post.media)
+        val downloadUrls = mutableListOf<String>()
+
+        post.media.forEach {
+            val url = uploadImage(it)
+            downloadUrls.add(url.toString())
+        }
 
         val postMap = mutableMapOf(
             "caption" to post.caption,
@@ -58,7 +64,9 @@ class PostRepository @Inject constructor(
             "media" to downloadUrls
         )
 
-        firestore.collection("posts").document().set(postMap).await()
+        firebaseAuth.uid?.let {
+            firestore.collection("posts").document().set(postMap).await()
+        }
 
         emit(Resource.Success(data = CreatePostResponse(Response.SUCCESS)))
     }.catch {

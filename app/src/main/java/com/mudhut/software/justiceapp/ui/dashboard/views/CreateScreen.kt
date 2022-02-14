@@ -239,7 +239,7 @@ fun MediaCard(uri: String, removeMedia: () -> Unit) {
     Box(
         modifier = Modifier.size(200.dp, 300.dp)
     ) {
-        when (checkString(uri.toString())) {
+        when (checkString(uri)) {
             1 -> ImageComposable(media = uri, removeMedia = removeMedia)
             2 -> VideoComposable(media = uri, removeMedia = removeMedia)
         }

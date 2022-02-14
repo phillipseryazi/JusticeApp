@@ -1,12 +1,13 @@
 package com.mudhut.software.justiceapp.ui.common
 
-import android.net.Uri
 import android.view.ViewGroup
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -33,7 +34,7 @@ fun VideoPlayerComposable(
         }
     }
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier.background(color = Color.Black)) {
         DisposableEffect(
             AndroidView(factory = { context ->
                 val videoPlayer = PlayerView(context).apply {
