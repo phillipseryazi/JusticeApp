@@ -115,7 +115,7 @@ fun BottomNavigationBar(
 ) {
     BottomNavigation(
         modifier = modifier,
-        backgroundColor = Color.Transparent,
+        backgroundColor = Color.Black.copy(alpha = 0.2f),
         elevation = 0.dp
     ) {
         navItems.forEach { screen ->
