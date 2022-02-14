@@ -52,3 +52,17 @@ fun checkString(string: String): Int {
         }
     }
 }
+
+fun simplifyCount(num: Int): String {
+    return when {
+        num in 1000..999999 -> {
+            "${(num / 1000)}k"
+        }
+        num >= 1000000 -> {
+            "${(num / 1000000)}M"
+        }
+        else -> {
+            num.toString()
+        }
+    }
+}

@@ -25,8 +25,6 @@ class PostRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : IPostRepository {
 
-    private val downloadUrls = mutableListOf<String>()
-
     private suspend fun uploadImage(uri: String): Uri {
         return withContext(Dispatchers.IO) {
             val uuid = if (checkString(uri) == 1) {

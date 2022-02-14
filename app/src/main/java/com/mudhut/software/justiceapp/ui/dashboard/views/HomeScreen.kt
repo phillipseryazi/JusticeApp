@@ -1,5 +1,6 @@
 package com.mudhut.software.justiceapp.ui.dashboard.views
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,8 +12,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -23,20 +26,37 @@ import com.mudhut.software.justiceapp.ui.common.VideoPlayerComposable
 import com.mudhut.software.justiceapp.ui.dashboard.viewmodels.HomeScreenUiState
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 import com.mudhut.software.justiceapp.utils.checkString
+import com.mudhut.software.justiceapp.utils.simplifyCount
 
 @Composable
 fun HomeScreen(
     uiState: HomeScreenUiState
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(0.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
     ) {
-        items(uiState.posts) {
-            HomeScreenItemComposable(
-                modifier = Modifier.fillParentMaxSize(),
-                post = it
+        if (uiState.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(24.dp)
+                    .align(Alignment.Center),
+                color = MaterialTheme.colors.primary
             )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                items(uiState.posts) {
+                    HomeScreenItemComposable(
+                        modifier = Modifier.fillParentMaxSize(),
+                        post = it
+                    )
+                }
+            }
         }
     }
 }
@@ -76,6 +96,14 @@ fun HomeScreenItemComposable(
             onUpVoteClicked = {},
             onCommentsClicked = {}
         )
+
+        HomeScreenInformationSection(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 16.dp, bottom = 120.dp),
+            author = post.author,
+            caption = post.caption
+        )
     }
 }
 
@@ -91,7 +119,7 @@ fun HomeScreenInteractionSection(
         IconButtonAndLabel(
             modifier = modifier,
             icon = R.drawable.ic_thumb_up,
-            text = upVotes.toString()
+            text = simplifyCount(upVotes)
         ) {
             onUpVoteClicked()
         }
@@ -99,7 +127,7 @@ fun HomeScreenInteractionSection(
         IconButtonAndLabel(
             modifier = modifier,
             icon = R.drawable.ic_comments,
-            text = commentCount.toString()
+            text = simplifyCount(commentCount)
         ) {
             onCommentsClicked()
         }
@@ -126,7 +154,7 @@ fun IconButtonAndLabel(
             onClick = onButtonClick
         ) {
             Icon(
-                modifier = Modifier.size(ButtonDefaults.IconSize * 2),
+                modifier = Modifier.size(24.dp),
                 painter = painterResource(id = icon),
                 tint = Color.White,
                 contentDescription = null
@@ -143,8 +171,28 @@ fun IconButtonAndLabel(
 }
 
 @Composable
-fun HomeScreenInformationSection(modifier: Modifier) {
-
+fun HomeScreenInformationSection(modifier: Modifier, author: String, caption: String) {
+    Column(modifier = modifier) {
+        Text(
+            modifier = Modifier.width(200.dp),
+            text = author,
+            style = MaterialTheme.typography.body1,
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp,
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            modifier = Modifier.width(200.dp),
+            text = caption,
+            style = MaterialTheme.typography.body1,
+            fontSize = 12.sp,
+            color = Color.White,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
 }
 
 @Preview
@@ -153,8 +201,8 @@ fun HomeScreenInteractionSectionPreview() {
     JusticeAppTheme {
         HomeScreenInteractionSection(
             modifier = Modifier,
-            299,
-            1000,
+            310000,
+            25000000,
             onUpVoteClicked = {},
             onCommentsClicked = {}
         )
