@@ -28,9 +28,9 @@ class JusticeApplication : Application(), Configuration.Provider {
 
     private fun cloudinaryConfig() {
         val config = mapOf(
-            "cloud_name" to "mudhut-software",
-            "api_key" to "449678456669366",
-            "api_secret" to "CqwsXMIDUUqAKxTLaVUk_u8HAPg"
+            "cloud_name" to BuildConfig.CLOUDINARY_CLOUD_NAME,
+            "api_key" to BuildConfig.CLOUDINARY_API_KEY,
+            "api_secret" to BuildConfig.CLOUDINARY_SECRET_KEY
         )
         MediaManager.init(this, config)
     }

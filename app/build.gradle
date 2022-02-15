@@ -17,6 +17,10 @@ android {
         versionCode 1
         versionName "1.0"
 
+        buildConfigField "String", "CLOUDINARY_CLOUD_NAME", '"mudhut-software"'
+        buildConfigField "String", "CLOUDINARY_API_KEY", '"449678456669366"'
+        buildConfigField "String", "CLOUDINARY_SECRET_KEY", '"CqwsXMIDUUqAKxTLaVUk_u8HAPg"'
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
