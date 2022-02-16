@@ -51,10 +51,12 @@ fun HomeScreen(
                 contentPadding = PaddingValues(0.dp)
             ) {
                 items(uiState.posts) {
-                    HomeScreenItemComposable(
-                        modifier = Modifier.fillParentMaxSize(),
-                        post = it
-                    )
+                    if (it != null) {
+                        HomeScreenItemComposable(
+                            modifier = Modifier.fillParentMaxSize(),
+                            post = it
+                        )
+                    }
                 }
             }
         }

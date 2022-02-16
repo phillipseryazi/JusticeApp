@@ -6,13 +6,13 @@ import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import com.mudhut.software.justiceapp.BuildConfig
-import com.mudhut.software.justiceapp.data.models.CreatePostResponse
 import com.mudhut.software.justiceapp.data.models.Post
 import com.mudhut.software.justiceapp.utils.Resource
 import com.mudhut.software.justiceapp.utils.Response
+import com.mudhut.software.justiceapp.utils.ResponseType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
@@ -20,9 +20,9 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class PostRepository @Inject constructor(
-    private val firebaseAuth: FirebaseAuth,
-    private val storage: FirebaseStorage,
-    private val firestore: FirebaseFirestore
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore,
+    private val database: FirebaseDatabase
 ) : IPostRepository {
     private val tag = "PostRepository"
     private var downloadUrl = MutableStateFlow("")
@@ -66,15 +66,15 @@ class PostRepository @Inject constructor(
             "created_at" to post.created_at,
             "upvote_count" to post.upvote_count,
             "comment_count" to post.comment_count,
-            "author" to firebaseAuth.currentUser?.uid,
+            "author" to auth.currentUser?.uid,
             "media" to downloadUrls
         )
 
-        firebaseAuth.uid?.let {
-            firestore
-                .collection("posts")
-                .document()
-                .set(postMap)
+        auth.uid?.let {
+            database.reference
+                .child("posts")
+                .push()
+                .setValue(postMap)
                 .await()
         }
     }
@@ -94,25 +94,43 @@ class PostRepository @Inject constructor(
             if (downloadUrls.size == post.media.size) {
                 savePostToFirestore(post, downloadUrls)
 
-                emit(Resource.Success(data = CreatePostResponse(Response.SUCCESS)))
+                emit(Resource.Success(data = Response(ResponseType.SUCCESS)))
             }
         }
     }.catch {
         emit(
             Resource.Error(
-                data = CreatePostResponse(Response.FAILED),
+                data = Response(ResponseType.FAILED),
                 message = it.localizedMessage ?: "Unknown error"
             )
         )
     }.flowOn(Dispatchers.IO)
 
 
-    override fun getPosts(): Flow<Resource<List<Post>>> = flow<Resource<List<Post>>> {
+    override fun getPosts(): Flow<Resource<List<Post?>>> = flow {
         emit(Resource.Loading())
 
-        val posts = firestore.collection("posts").get().await()
+        val dataSnapshot = database.reference.child("posts").get().await()
 
-        emit(Resource.Success(data = posts.toObjects(Post::class.java)))
+        val posts = dataSnapshot.children.map { it.getValue(Post::class.java) }
+
+        emit(Resource.Success(data = posts))
+    }.catch {
+        emit(
+            Resource.Error(
+                data = null,
+                message = it.localizedMessage ?: "Unknown error"
+            )
+        )
+    }.flowOn(Dispatchers.IO)
+
+    override fun upVotePost(postId: String): Flow<Resource<Response>> = flow {
+        emit(Resource.Loading())
+
+
+        database.reference.child("likes").child(postId)
+
+        emit(Resource.Success(Response(ResponseType.SUCCESS)))
     }.catch {
         emit(
             Resource.Error(

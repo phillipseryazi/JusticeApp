@@ -6,7 +6,9 @@ sealed class Resource<T>(val data: T? = null, val message: String? = null) {
     class Loading<T>() : Resource<T>()
 }
 
-enum class Response() {
+enum class ResponseType() {
     SUCCESS,
     FAILED
 }
+
+data class Response(val responseType: ResponseType)

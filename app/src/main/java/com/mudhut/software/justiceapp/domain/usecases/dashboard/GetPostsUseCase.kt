@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class GetPostsUseCase @Inject constructor(private val repository: IPostRepository) {
-    operator fun invoke(): Flow<Resource<List<Post>>> = flow {
+    operator fun invoke(): Flow<Resource<List<Post?>>> = flow {
         repository.getPosts().collect { emit(it) }
     }
 }

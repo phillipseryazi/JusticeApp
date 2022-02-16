@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class HomeScreenUiState(
-    val posts: List<Post> = listOf(),
+    val posts: List<Post?> = listOf(),
     val isLoading: Boolean = false,
     val message: String = ""
 )
