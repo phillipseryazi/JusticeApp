@@ -35,3 +35,4 @@ class JusticeApplication : Application(), Configuration.Provider {
         MediaManager.init(this, config)
     }
 }
+

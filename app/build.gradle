@@ -20,6 +20,7 @@ android {
         buildConfigField "String", "CLOUDINARY_CLOUD_NAME", '"mudhut-software"'
         buildConfigField "String", "CLOUDINARY_API_KEY", '"449678456669366"'
         buildConfigField "String", "CLOUDINARY_SECRET_KEY", '"CqwsXMIDUUqAKxTLaVUk_u8HAPg"'
+        buildConfigField "String", "CLOUDINARY_UPLOAD_PRESET", '"yzxrynjc"'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -62,7 +63,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.1'
     implementation 'androidx.activity:activity-compose:1.4.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.startup:startup-runtime:1.1.0'
+    implementation 'androidx.startup:startup-runtime:1.1.1'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
@@ -144,5 +145,9 @@ dependencies {
     // Cloudinary
     def cloudinary_version = "1.30.0"
     implementation "com.cloudinary:cloudinary-android:$cloudinary_version"
+
+    // Sili Compressor
+    def sili_compressor_version = "2.2.4"
+    implementation "com.iceteck.silicompressorr:silicompressor:$sili_compressor_version"
 
 }

@@ -8,6 +8,7 @@ import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.mudhut.software.justiceapp.BuildConfig
 import com.mudhut.software.justiceapp.data.models.CreatePostResponse
 import com.mudhut.software.justiceapp.data.models.Post
 import com.mudhut.software.justiceapp.utils.Resource
@@ -34,11 +35,9 @@ class PostRepository @Inject constructor(
                 .get()
                 .upload(Uri.parse(filePath))
                 .option("folder", "JusticeApp/")
-                .unsigned("yzxrynjc")
+                .unsigned(BuildConfig.CLOUDINARY_UPLOAD_PRESET)
                 .callback(object : UploadCallback {
-                    override fun onStart(requestId: String?) {
-                        Log.d(tag, "Media Upload started")
-                    }
+                    override fun onStart(requestId: String?) {}
 
                     override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {
                         Log.d(tag, "Media Upload Progress: $bytes of $totalBytes")
