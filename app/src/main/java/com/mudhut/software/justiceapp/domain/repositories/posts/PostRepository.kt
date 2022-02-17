@@ -67,7 +67,8 @@ class PostRepository @Inject constructor(
             "upvote_count" to post.upvote_count,
             "comment_count" to post.comment_count,
             "author" to auth.currentUser?.uid,
-            "media" to downloadUrls
+            "media" to downloadUrls,
+            "key" to ""
         )
 
         auth.uid?.let {
@@ -112,7 +113,9 @@ class PostRepository @Inject constructor(
 
         val dataSnapshot = database.reference.child("posts").get().await()
 
-        val posts = dataSnapshot.children.map { it.getValue(Post::class.java) }
+        val posts = dataSnapshot.children.map {
+            it.key?.let { key -> it.getValue(Post::class.java)?.copy(key = key) }
+        }
 
         emit(Resource.Success(data = posts))
     }.catch {
@@ -126,7 +129,6 @@ class PostRepository @Inject constructor(
 
     override fun upVotePost(postId: String): Flow<Resource<Response>> = flow {
         emit(Resource.Loading())
-
 
         database.reference.child("likes").child(postId)
 

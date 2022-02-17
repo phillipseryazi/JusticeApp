@@ -1,6 +1,7 @@
 package com.mudhut.software.justiceapp.data.models
 
 data class Post(
+    var key: String = "",
     var author: String = "",
     var caption: String = "",
     var created_at: String = "",
