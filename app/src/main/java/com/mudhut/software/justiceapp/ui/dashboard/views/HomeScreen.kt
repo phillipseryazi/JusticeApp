@@ -30,6 +30,7 @@ import com.mudhut.software.justiceapp.utils.simplifyCount
 
 @Composable
 fun HomeScreen(
+    onUpVoteClicked: (postId: String) -> Unit,
     uiState: HomeScreenUiState
 ) {
     Box(
@@ -54,7 +55,8 @@ fun HomeScreen(
                     if (it != null) {
                         HomeScreenItemComposable(
                             modifier = Modifier.fillParentMaxSize(),
-                            post = it
+                            post = it,
+                            onUpVoteClicked = onUpVoteClicked
                         )
                     }
                 }
@@ -67,7 +69,8 @@ fun HomeScreen(
 @Composable
 fun HomeScreenItemComposable(
     modifier: Modifier,
-    post: Post
+    post: Post,
+    onUpVoteClicked: (String) -> Unit,
 ) {
     val pagerState = rememberPagerState()
 
@@ -95,7 +98,7 @@ fun HomeScreenItemComposable(
                 .padding(end = 8.dp),
             upVotes = post.upvote_count,
             commentCount = post.comment_count,
-            onUpVoteClicked = {},
+            onUpVoteClicked = { onUpVoteClicked(post.key) },
             onCommentsClicked = {}
         )
 
@@ -121,18 +124,16 @@ fun HomeScreenInteractionSection(
         IconButtonAndLabel(
             modifier = modifier,
             icon = R.drawable.ic_thumb_up,
-            text = simplifyCount(upVotes)
-        ) {
-            onUpVoteClicked()
-        }
+            text = simplifyCount(upVotes),
+            onButtonClick = onUpVoteClicked
+        )
         Spacer(modifier = Modifier.height(16.dp))
         IconButtonAndLabel(
             modifier = modifier,
             icon = R.drawable.ic_comments,
-            text = simplifyCount(commentCount)
-        ) {
-            onCommentsClicked()
-        }
+            text = simplifyCount(commentCount),
+            onButtonClick = onCommentsClicked
+        )
     }
 }
 
@@ -205,7 +206,9 @@ fun HomeScreenInteractionSectionPreview() {
             modifier = Modifier,
             310000,
             25000000,
-            onUpVoteClicked = {},
+            onUpVoteClicked = {
+
+            },
             onCommentsClicked = {}
         )
     }

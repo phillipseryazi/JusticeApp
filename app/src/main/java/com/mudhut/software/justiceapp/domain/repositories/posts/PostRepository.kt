@@ -127,10 +127,30 @@ class PostRepository @Inject constructor(
         )
     }.flowOn(Dispatchers.IO)
 
+    private suspend fun incrementUpVoteCount(postId: String) {
+        val dbRef = database.reference.child("posts")
+
+        val currentCount = dbRef.child("$postId/upvote_count").get().await()
+
+        val newCount = currentCount.value as Int + 1
+
+        val updateMap = mapOf(
+            "$postId/upvote_count" to newCount
+        )
+
+        dbRef.updateChildren(updateMap).await()
+    }
+
     override fun upVotePost(postId: String): Flow<Resource<Response>> = flow {
         emit(Resource.Loading())
 
-        database.reference.child("likes").child(postId)
+        database.reference
+            .child("likes")
+            .child(postId)
+            .setValue(mapOf("${auth.currentUser?.uid}" to "${auth.currentUser?.uid}"))
+            .await()
+
+        incrementUpVoteCount(postId)
 
         emit(Resource.Success(Response(ResponseType.SUCCESS)))
     }.catch {
