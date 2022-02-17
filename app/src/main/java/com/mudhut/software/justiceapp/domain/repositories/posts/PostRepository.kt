@@ -1,74 +1,142 @@
 package com.mudhut.software.justiceapp.domain.repositories.posts
 
 import android.net.Uri
+import android.util.Log
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
-import com.mudhut.software.justiceapp.data.models.CreatePostResponse
+import com.mudhut.software.justiceapp.BuildConfig
 import com.mudhut.software.justiceapp.data.models.Post
 import com.mudhut.software.justiceapp.utils.Resource
 import com.mudhut.software.justiceapp.utils.Response
+import com.mudhut.software.justiceapp.utils.ResponseType
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
-import java.util.*
 import javax.inject.Inject
 
 class PostRepository @Inject constructor(
-    private val firebaseAuth: FirebaseAuth,
-    private val storage: FirebaseStorage,
-    private val firestore: FirebaseFirestore
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore,
+    private val database: FirebaseDatabase
 ) : IPostRepository {
-    private val downloadUrls = mutableListOf<String>()
+    private val tag = "PostRepository"
+    private var downloadUrl = MutableStateFlow("")
+    private var downloadUrls = mutableListOf<String>()
 
-    private suspend fun uploadImage(uri: Uri, userId: String): Uri {
-        return withContext(Dispatchers.IO) {
-            val reference = storage
-                .getReference("media/$userId")
-                .child(UUID.randomUUID().toString())
 
-            reference.putFile(uri).await()
+    private suspend fun uploadToCloudinary(filePath: String) {
+        coroutineScope {
+            MediaManager
+                .get()
+                .upload(Uri.parse(filePath))
+                .option("folder", "JusticeApp/")
+                .unsigned(BuildConfig.CLOUDINARY_UPLOAD_PRESET)
+                .callback(object : UploadCallback {
+                    override fun onStart(requestId: String?) {}
 
-            reference.downloadUrl.await()
+                    override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {
+                        Log.d(tag, "Media Upload Progress: $bytes of $totalBytes")
+                    }
+
+                    override fun onSuccess(
+                        requestId: String?,
+                        resultData: MutableMap<Any?, Any?>?
+                    ) {
+                        downloadUrl.value = resultData?.get("url").toString()
+                    }
+
+                    override fun onError(requestId: String?, error: ErrorInfo?) {
+                        Log.e(tag, "Media Upload Error: ${error?.description}")
+                    }
+
+                    override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
+
+                }).dispatch()
+        }
+    }
+
+    private suspend fun savePostToFirestore(post: Post, downloadUrls: List<String>) {
+        val postMap = mutableMapOf(
+            "caption" to post.caption,
+            "created_at" to post.created_at,
+            "upvote_count" to post.upvote_count,
+            "comment_count" to post.comment_count,
+            "author" to auth.currentUser?.uid,
+            "media" to downloadUrls,
+            "key" to ""
+        )
+
+        auth.uid?.let {
+            database.reference
+                .child("posts")
+                .push()
+                .setValue(postMap)
+                .await()
         }
     }
 
     override fun createPost(post: Post) = flow {
         emit(Resource.Loading())
 
-        downloadUrls.clear()
-
         post.media.forEach {
-            val url = firebaseAuth.currentUser?.uid?.let { uid ->
-                uploadImage(it, uid)
-            }
-
-            if (url != null) {
-                downloadUrls.add(url.toString())
-            }
+            uploadToCloudinary(it)
         }
 
-        val postMap = mutableMapOf(
-            "caption" to post.caption,
-            "created_at" to post.created_at,
-            "upvote_count" to post.upvote_count,
-            "comment_count" to post.comment_count,
-            "author" to firebaseAuth.currentUser?.uid,
-            "media" to downloadUrls
-        )
+        downloadUrl.collect {
+            if (it.trim().isNotEmpty() && it.trim().isNotBlank()) {
+                downloadUrls.add(it.replace("http", "https"))
+            }
 
-        firebaseAuth.uid?.let {
-            firestore.collection("posts").document().set(postMap).await()
+            if (downloadUrls.size == post.media.size) {
+                savePostToFirestore(post, downloadUrls)
+
+                emit(Resource.Success(data = Response(ResponseType.SUCCESS)))
+            }
         }
-
-        emit(Resource.Success(data = CreatePostResponse(Response.SUCCESS)))
     }.catch {
         emit(
             Resource.Error(
-                data = CreatePostResponse(Response.FAILED),
+                data = Response(ResponseType.FAILED),
+                message = it.localizedMessage ?: "Unknown error"
+            )
+        )
+    }.flowOn(Dispatchers.IO)
+
+
+    override fun getPosts(): Flow<Resource<List<Post?>>> = flow {
+        emit(Resource.Loading())
+
+        val dataSnapshot = database.reference.child("posts").get().await()
+
+        val posts = dataSnapshot.children.map {
+            it.key?.let { key -> it.getValue(Post::class.java)?.copy(key = key) }
+        }
+
+        emit(Resource.Success(data = posts))
+    }.catch {
+        emit(
+            Resource.Error(
+                data = null,
+                message = it.localizedMessage ?: "Unknown error"
+            )
+        )
+    }.flowOn(Dispatchers.IO)
+
+    override fun upVotePost(postId: String): Flow<Resource<Response>> = flow {
+        emit(Resource.Loading())
+
+        database.reference.child("likes").child(postId)
+
+        emit(Resource.Success(Response(ResponseType.SUCCESS)))
+    }.catch {
+        emit(
+            Resource.Error(
+                data = null,
                 message = it.localizedMessage ?: "Unknown error"
             )
         )

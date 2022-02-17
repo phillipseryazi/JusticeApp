@@ -2,6 +2,7 @@ package com.mudhut.software.justiceapp.ui.dashboard.views
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -73,8 +74,9 @@ fun DashboardScreen() {
                         .padding(
                             start = 0.dp,
                             end = 0.dp
-                        )
-                )
+                        ),
+
+                    )
             }
         },
         floatingActionButton = {
@@ -114,6 +116,8 @@ fun BottomNavigationBar(
 ) {
     BottomNavigation(
         modifier = modifier,
+        backgroundColor = Color.Black.copy(alpha = 0.2f),
+        elevation = 0.dp
     ) {
         navItems.forEach { screen ->
             BottomNavigationItem(
@@ -123,6 +127,7 @@ fun BottomNavigationBar(
                 unselectedContentColor = Color.White,
                 icon = {
                     Icon(
+                        modifier = Modifier.size(24.dp),
                         painter = painterResource(screen.icon),
                         contentDescription = null
                     )

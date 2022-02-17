@@ -1,9 +1,12 @@
 package com.mudhut.software.justiceapp.di
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mudhut.software.justiceapp.domain.repositories.auth.AuthenticationRepository
 import com.mudhut.software.justiceapp.domain.repositories.auth.IAuthenticationRepository
+import com.mudhut.software.justiceapp.domain.repositories.posts.IPostRepository
+import com.mudhut.software.justiceapp.domain.repositories.posts.PostRepository
 import com.mudhut.software.justiceapp.domain.repositories.profiles.IProfileRepository
 import com.mudhut.software.justiceapp.domain.repositories.profiles.ProfileRepository
 import dagger.Module
@@ -22,7 +25,21 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun providesProfileRepository(firestore: FirebaseFirestore, auth: FirebaseAuth) =
-        ProfileRepository(firestore, auth) as IProfileRepository
+    fun providesProfileRepository(
+        firestore: FirebaseFirestore,
+        auth: FirebaseAuth
+    ) = ProfileRepository(firestore, auth) as IProfileRepository
+
+    @Singleton
+    @Provides
+    fun providesPostRepository(
+        firebaseAuth: FirebaseAuth,
+        firebaseFirestore: FirebaseFirestore,
+        firebaseDatabase: FirebaseDatabase
+    ) = PostRepository(
+        firebaseAuth,
+        firebaseFirestore,
+        firebaseDatabase
+    ) as IPostRepository
 
 }

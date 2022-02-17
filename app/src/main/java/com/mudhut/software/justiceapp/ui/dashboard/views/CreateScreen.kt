@@ -33,6 +33,7 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerView
 import com.mudhut.software.justiceapp.R
 import com.mudhut.software.justiceapp.ui.common.LoadingScreen
+import com.mudhut.software.justiceapp.ui.common.PlayPauseButton
 import com.mudhut.software.justiceapp.ui.dashboard.viewmodels.CreateScreenUiState
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 import com.mudhut.software.justiceapp.utils.checkString
@@ -41,7 +42,7 @@ import com.skydoves.landscapist.glide.GlideImage
 @Composable
 fun CreateScreen(
     addItemToMediaList: (list: List<Uri>) -> Unit,
-    removeItemFromMediaList: (uri: Uri) -> Unit,
+    removeItemFromMediaList: (uri: String) -> Unit,
     onCaptionChange: (String) -> Unit,
     onPopBackStack: () -> Unit,
     onPostClick: () -> Unit,
@@ -108,7 +109,7 @@ fun CreateScreen(
                         removeMedia = {
                             removeItemFromMediaList(item)
                         })
-                    Log.d("Uri", item.path.toString())
+                    Log.d("Uri", item)
                 }
             }
             Spacer(
@@ -234,11 +235,11 @@ fun OpenGalleryButton(
 
 
 @Composable
-fun MediaCard(uri: Uri, removeMedia: () -> Unit) {
+fun MediaCard(uri: String, removeMedia: () -> Unit) {
     Box(
         modifier = Modifier.size(200.dp, 300.dp)
     ) {
-        when (checkString(uri.toString())) {
+        when (checkString(uri)) {
             1 -> ImageComposable(media = uri, removeMedia = removeMedia)
             2 -> VideoComposable(media = uri, removeMedia = removeMedia)
         }
@@ -247,7 +248,7 @@ fun MediaCard(uri: Uri, removeMedia: () -> Unit) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ImageComposable(media: Uri, removeMedia: () -> Unit) {
+fun ImageComposable(media: String, removeMedia: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(1.dp, Color.White),
@@ -275,7 +276,7 @@ fun ImageComposable(media: Uri, removeMedia: () -> Unit) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun VideoComposable(media: Uri, removeMedia: () -> Unit) {
+fun VideoComposable(media: String, removeMedia: () -> Unit) {
     val context = LocalContext.current
 
     var isPlaying by remember {
@@ -360,30 +361,6 @@ fun RemoveMediaButton(modifier: Modifier, removeMedia: () -> Unit) {
     }
 }
 
-@Composable
-fun PlayPauseButton(
-    modifier: Modifier,
-    isPlaying: Boolean,
-    onButtonClick: () -> Unit
-) {
-    Button(
-        shape = CircleShape,
-        modifier = modifier,
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = if (isPlaying) Color.Transparent else Color.Blue
-        ),
-        contentPadding = PaddingValues(0.dp),
-        elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
-        onClick = onButtonClick
-    ) {
-        Icon(
-            painter = if (isPlaying) painterResource(id = R.drawable.ic_pause)
-            else painterResource(id = R.drawable.ic_play),
-            tint = Color.White,
-            contentDescription = null
-        )
-    }
-}
 
 @Preview
 @Composable

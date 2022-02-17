@@ -2,7 +2,7 @@
 buildscript {
     ext {
         kotlin_version = '1.6.10'
-        compose_version = '1.2.0-alpha02'
+        compose_version = '1.2.0-alpha03'
         dagger_hilt = '2.38.1'
         google_services = '4.3.10'
     }

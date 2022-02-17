@@ -35,17 +35,34 @@ fun getDestinationType(currentDestination: String?): Destination? {
 
 fun checkString(string: String): Int {
     val imgRegex = """image""".toRegex()
+    val imgExt = """.jpg""".toRegex()
+
     val vidRegex = """video""".toRegex()
+    val vidExt = """.mp4""".toRegex()
 
     return when {
-        imgRegex.containsMatchIn(string) -> {
+        imgRegex.containsMatchIn(string) || imgExt.containsMatchIn(string) -> {
             1
         }
-        vidRegex.containsMatchIn(string) -> {
+        vidRegex.containsMatchIn(string) || vidExt.containsMatchIn(string) -> {
             2
         }
         else -> {
             0
+        }
+    }
+}
+
+fun simplifyCount(num: Int): String {
+    return when {
+        num in 1000..999999 -> {
+            "${(num / 1000)}k"
+        }
+        num >= 1000000 -> {
+            "${(num / 1000000)}M"
+        }
+        else -> {
+            num.toString()
         }
     }
 }
