@@ -3,7 +3,7 @@ package com.mudhut.software.justiceapp.ui.dashboard.views
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,7 +30,7 @@ import com.mudhut.software.justiceapp.utils.simplifyCount
 
 @Composable
 fun HomeScreen(
-    onUpVoteClicked: (postId: String) -> Unit,
+    onUpVoteClicked: (postId: String, pos: Int) -> Unit,
     uiState: HomeScreenUiState
 ) {
     Box(
@@ -51,12 +51,12 @@ fun HomeScreen(
                     .fillMaxSize(),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                items(uiState.posts) {
-                    if (it != null) {
+                itemsIndexed(uiState.posts) { index, item ->
+                    if (item != null) {
                         HomeScreenItemComposable(
                             modifier = Modifier.fillParentMaxSize(),
-                            post = it,
-                            onUpVoteClicked = onUpVoteClicked
+                            post = item,
+                            onUpVoteClicked = { onUpVoteClicked(item.key, index) }
                         )
                     }
                 }
@@ -70,7 +70,7 @@ fun HomeScreen(
 fun HomeScreenItemComposable(
     modifier: Modifier,
     post: Post,
-    onUpVoteClicked: (String) -> Unit,
+    onUpVoteClicked: () -> Unit,
 ) {
     val pagerState = rememberPagerState()
 
@@ -98,7 +98,8 @@ fun HomeScreenItemComposable(
                 .padding(end = 8.dp),
             upVotes = post.upvote_count,
             commentCount = post.comment_count,
-            onUpVoteClicked = { onUpVoteClicked(post.key) },
+            isUpvoted = post.isUpvoted,
+            onUpVoteClicked = onUpVoteClicked,
             onCommentsClicked = {}
         )
 
@@ -117,30 +118,46 @@ fun HomeScreenInteractionSection(
     modifier: Modifier,
     upVotes: Int,
     commentCount: Int,
+    isUpvoted: Boolean,
     onUpVoteClicked: () -> Unit,
     onCommentsClicked: () -> Unit
 ) {
     Column(modifier) {
         IconButtonAndLabel(
             modifier = modifier,
-            icon = R.drawable.ic_thumb_up,
+            icon = {
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    painter = painterResource(id = R.drawable.ic_arrow_up),
+                    tint = if (isUpvoted) Color.Green else Color.White,
+                    contentDescription = null
+                )
+            },
             text = simplifyCount(upVotes),
             onButtonClick = onUpVoteClicked
         )
         Spacer(modifier = Modifier.height(16.dp))
         IconButtonAndLabel(
             modifier = modifier,
-            icon = R.drawable.ic_comments,
+            icon = {
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    painter = painterResource(id = R.drawable.ic_comments),
+                    tint = Color.White,
+                    contentDescription = null
+                )
+            },
             text = simplifyCount(commentCount),
             onButtonClick = onCommentsClicked
         )
     }
 }
 
+
 @Composable
 fun IconButtonAndLabel(
     modifier: Modifier,
-    icon: Int,
+    icon: @Composable () -> Unit,
     text: String,
     onButtonClick: () -> Unit
 ) {
@@ -156,12 +173,7 @@ fun IconButtonAndLabel(
             elevation = ButtonDefaults.elevation(0.dp),
             onClick = onButtonClick
         ) {
-            Icon(
-                modifier = Modifier.size(24.dp),
-                painter = painterResource(id = icon),
-                tint = Color.White,
-                contentDescription = null
-            )
+            icon()
         }
         Text(
             text = text,
@@ -206,9 +218,8 @@ fun HomeScreenInteractionSectionPreview() {
             modifier = Modifier,
             310000,
             25000000,
-            onUpVoteClicked = {
-
-            },
+            isUpvoted = true,
+            onUpVoteClicked = {},
             onCommentsClicked = {}
         )
     }

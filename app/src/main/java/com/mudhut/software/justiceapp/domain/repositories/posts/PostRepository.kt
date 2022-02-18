@@ -7,6 +7,7 @@ import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ServerValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mudhut.software.justiceapp.BuildConfig
 import com.mudhut.software.justiceapp.data.models.Post
@@ -107,14 +108,26 @@ class PostRepository @Inject constructor(
         )
     }.flowOn(Dispatchers.IO)
 
+    private suspend fun checkIfPostWasUpVotedByUser(postId: String): Boolean {
+        val dataSnapshot = database.reference
+            .child("upvotes/$postId/${auth.currentUser?.uid}")
+            .get()
+            .await()
+
+        return dataSnapshot.exists()
+    }
+
 
     override fun getPosts(): Flow<Resource<List<Post?>>> = flow {
         emit(Resource.Loading())
 
         val dataSnapshot = database.reference.child("posts").get().await()
 
-        val posts = dataSnapshot.children.map {
-            it.key?.let { key -> it.getValue(Post::class.java)?.copy(key = key) }
+        val posts = dataSnapshot.children.map { snapshot ->
+            snapshot.getValue(Post::class.java)?.apply {
+                key = snapshot.key.toString()
+                isUpvoted = checkIfPostWasUpVotedByUser(snapshot.key.toString())
+            }
         }
 
         emit(Resource.Success(data = posts))
@@ -128,29 +141,23 @@ class PostRepository @Inject constructor(
     }.flowOn(Dispatchers.IO)
 
     private suspend fun incrementUpVoteCount(postId: String) {
-        val dbRef = database.reference.child("posts")
-
-        val currentCount = dbRef.child("$postId/upvote_count").get().await()
-
-        val newCount = currentCount.value as Int + 1
-
-        val updateMap = mapOf(
-            "$postId/upvote_count" to newCount
-        )
-
-        dbRef.updateChildren(updateMap).await()
+        database.reference.child("posts/$postId/upvote_count")
+            .setValue(ServerValue.increment(1))
+            .await()
     }
 
     override fun upVotePost(postId: String): Flow<Resource<Response>> = flow {
         emit(Resource.Loading())
+        val dbRef = database.reference.child("upvotes/$postId")
 
-        database.reference
-            .child("likes")
-            .child(postId)
-            .setValue(mapOf("${auth.currentUser?.uid}" to "${auth.currentUser?.uid}"))
-            .await()
+        val alreadyVoted = dbRef.child("${auth.currentUser?.uid}").get().await()
 
-        incrementUpVoteCount(postId)
+        if (!alreadyVoted.exists()) {
+            dbRef.setValue(mapOf("${auth.currentUser?.uid}" to "${auth.currentUser?.uid}"))
+                .await()
+
+            incrementUpVoteCount(postId)
+        }
 
         emit(Resource.Success(Response(ResponseType.SUCCESS)))
     }.catch {
@@ -161,4 +168,10 @@ class PostRepository @Inject constructor(
             )
         )
     }.flowOn(Dispatchers.IO)
+
+    private suspend fun decrementUpVoteCount(postId: String) {
+        database.reference.child("posts/$postId/upvote_count")
+            .setValue(ServerValue.increment(-1))
+            .await()
+    }
 }

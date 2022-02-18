@@ -15,9 +15,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class HomeScreenUiState(
-    val posts: List<Post?> = listOf(),
+    val posts: MutableList<Post?> = mutableListOf(),
     val isLoading: Boolean = false,
-    val message: String = ""
+    val message: String = "",
+    val isUpVoted: Boolean = false
 )
 
 @HiltViewModel
@@ -37,7 +38,7 @@ class HomeScreenViewModel @Inject constructor(
 
     private fun getPosts() {
         viewModelScope.launch {
-            getPostsUseCase.invoke().collect {
+            getPostsUseCase().collect {
                 when (it) {
                     is Resource.Loading -> {
                         uiState.value = uiState.value.copy(isLoading = true)
@@ -45,7 +46,7 @@ class HomeScreenViewModel @Inject constructor(
                     is Resource.Success -> {
                         uiState.value = uiState.value.copy(
                             isLoading = false,
-                            posts = it.data ?: listOf()
+                            posts = it.data?.toMutableList() ?: mutableListOf()
                         )
                     }
                     is Resource.Error -> {
@@ -60,13 +61,13 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 
-    fun upVotePost(postId: String) {
+    fun upVotePost(postId: String, pos: Int) {
         viewModelScope.launch {
-            upVotePostUseCase.invoke(postId).collect {
+            upVotePostUseCase(postId).collect {
                 when (it) {
                     is Resource.Loading -> {}
                     is Resource.Success -> {
-                        uiState.value = uiState.value.copy(message = "Post up voted")
+                        updateScreenOnUpVote(uiState.value.posts, pos)
                     }
                     is Resource.Error -> {
                         uiState.value = uiState.value.copy(
@@ -76,5 +77,19 @@ class HomeScreenViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun updateScreenOnUpVote(list: MutableList<Post?>, pos: Int) {
+        list[pos]?.upvote_count = list[pos]?.upvote_count?.plus(1)!!
+        list[pos]?.isUpvoted = true
+
+        uiState.value = uiState.value.copy(
+            posts = list,
+            message = "Post upvoted"
+        )
+    }
+
+    fun downVotePost(postId: String) {
+        viewModelScope.launch { }
     }
 }
