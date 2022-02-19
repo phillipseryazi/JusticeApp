@@ -6,6 +6,7 @@ import com.mudhut.software.justiceapp.domain.usecases.auth.EmailPasswordLoginUse
 import com.mudhut.software.justiceapp.domain.usecases.auth.EmailPasswordRegistrationUseCase
 import com.mudhut.software.justiceapp.domain.usecases.posts.CreatePostUseCase
 import com.mudhut.software.justiceapp.domain.usecases.posts.GetPostsUseCase
+import com.mudhut.software.justiceapp.domain.usecases.posts.UnVotePostUseCase
 import com.mudhut.software.justiceapp.domain.usecases.posts.UpVotePostUseCase
 import dagger.Module
 import dagger.Provides
@@ -30,6 +31,9 @@ object UseCaseModule {
     fun providesGetPostsUseCase(repository: PostRepository) = GetPostsUseCase(repository)
 
     @Provides
-    fun providesUpVotePostsUseCase(repository: PostRepository) = UpVotePostUseCase(repository)
+    fun providesUpVotePostUseCase(repository: PostRepository) = UpVotePostUseCase(repository)
+
+    @Provides
+    fun providesUnVotePostUseCase(repository: PostRepository) = UnVotePostUseCase(repository)
 
 }

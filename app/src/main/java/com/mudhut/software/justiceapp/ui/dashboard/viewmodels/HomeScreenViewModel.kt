@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mudhut.software.justiceapp.data.models.Post
 import com.mudhut.software.justiceapp.domain.usecases.posts.GetPostsUseCase
+import com.mudhut.software.justiceapp.domain.usecases.posts.UnVotePostUseCase
 import com.mudhut.software.justiceapp.domain.usecases.posts.UpVotePostUseCase
 import com.mudhut.software.justiceapp.utils.Resource
 import com.mudhut.software.justiceapp.utils.UNKNOWN_ERROR_MESSAGE
@@ -24,7 +25,8 @@ data class HomeScreenUiState(
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val getPostsUseCase: GetPostsUseCase,
-    private val upVotePostUseCase: UpVotePostUseCase
+    private val upVotePostUseCase: UpVotePostUseCase,
+    private val unVotePostUseCase: UnVotePostUseCase
 ) : ViewModel() {
 
     private val tag = "HomeScreenViewModel"
@@ -89,7 +91,31 @@ class HomeScreenViewModel @Inject constructor(
         )
     }
 
-    fun downVotePost(postId: String) {
-        viewModelScope.launch { }
+    fun unVotePost(postId: String, pos: Int) {
+        viewModelScope.launch {
+            unVotePostUseCase(postId).collect {
+                when (it) {
+                    is Resource.Loading -> {}
+                    is Resource.Success -> {
+                        updateScreenOnUnVote(uiState.value.posts, pos)
+                    }
+                    is Resource.Error -> {
+                        uiState.value = uiState.value.copy(
+                            message = it.message ?: UNKNOWN_ERROR_MESSAGE
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateScreenOnUnVote(list: MutableList<Post?>, pos: Int) {
+        list[pos]?.upvote_count = list[pos]?.upvote_count?.minus(1)!!
+        list[pos]?.isUpvoted = false
+
+        uiState.value = uiState.value.copy(
+            posts = list,
+            message = "Post unvoted"
+        )
     }
 }

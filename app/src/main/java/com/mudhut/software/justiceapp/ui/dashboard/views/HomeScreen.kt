@@ -30,7 +30,8 @@ import com.mudhut.software.justiceapp.utils.simplifyCount
 
 @Composable
 fun HomeScreen(
-    onUpVoteClicked: (postId: String, pos: Int) -> Unit,
+    upVotePost: (postId: String, pos: Int) -> Unit,
+    unVotePost: (postId: String, pos: Int) -> Unit,
     uiState: HomeScreenUiState
 ) {
     Box(
@@ -56,7 +57,13 @@ fun HomeScreen(
                         HomeScreenItemComposable(
                             modifier = Modifier.fillParentMaxSize(),
                             post = item,
-                            onUpVoteClicked = { onUpVoteClicked(item.key, index) }
+                            onVoteClicked = {
+                                if (item.isUpvoted) {
+                                    unVotePost(item.key, index)
+                                } else {
+                                    upVotePost(item.key, index)
+                                }
+                            }
                         )
                     }
                 }
@@ -70,7 +77,7 @@ fun HomeScreen(
 fun HomeScreenItemComposable(
     modifier: Modifier,
     post: Post,
-    onUpVoteClicked: () -> Unit,
+    onVoteClicked: () -> Unit,
 ) {
     val pagerState = rememberPagerState()
 
@@ -99,7 +106,7 @@ fun HomeScreenItemComposable(
             upVotes = post.upvote_count,
             commentCount = post.comment_count,
             isUpvoted = post.isUpvoted,
-            onUpVoteClicked = onUpVoteClicked,
+            onVoteClicked = onVoteClicked,
             onCommentsClicked = {}
         )
 
@@ -119,7 +126,7 @@ fun HomeScreenInteractionSection(
     upVotes: Int,
     commentCount: Int,
     isUpvoted: Boolean,
-    onUpVoteClicked: () -> Unit,
+    onVoteClicked: () -> Unit,
     onCommentsClicked: () -> Unit
 ) {
     Column(modifier) {
@@ -134,7 +141,7 @@ fun HomeScreenInteractionSection(
                 )
             },
             text = simplifyCount(upVotes),
-            onButtonClick = onUpVoteClicked
+            onButtonClick = onVoteClicked
         )
         Spacer(modifier = Modifier.height(16.dp))
         IconButtonAndLabel(
@@ -219,7 +226,7 @@ fun HomeScreenInteractionSectionPreview() {
             310000,
             25000000,
             isUpvoted = true,
-            onUpVoteClicked = {},
+            onVoteClicked = {},
             onCommentsClicked = {}
         )
     }
