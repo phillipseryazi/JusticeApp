@@ -7,12 +7,14 @@ import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ServerValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mudhut.software.justiceapp.BuildConfig
 import com.mudhut.software.justiceapp.data.models.Post
 import com.mudhut.software.justiceapp.utils.Resource
 import com.mudhut.software.justiceapp.utils.Response
 import com.mudhut.software.justiceapp.utils.ResponseType
+import com.mudhut.software.justiceapp.utils.UNKNOWN_ERROR_MESSAGE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
@@ -102,10 +104,19 @@ class PostRepository @Inject constructor(
         emit(
             Resource.Error(
                 data = Response(ResponseType.FAILED),
-                message = it.localizedMessage ?: "Unknown error"
+                message = it.localizedMessage ?: UNKNOWN_ERROR_MESSAGE
             )
         )
     }.flowOn(Dispatchers.IO)
+
+    private suspend fun checkIfPostWasUpVotedByUser(postId: String): Boolean {
+        val dataSnapshot = database.reference
+            .child("upvotes/$postId/${auth.currentUser?.uid}")
+            .get()
+            .await()
+
+        return dataSnapshot.exists()
+    }
 
 
     override fun getPosts(): Flow<Resource<List<Post?>>> = flow {
@@ -113,8 +124,11 @@ class PostRepository @Inject constructor(
 
         val dataSnapshot = database.reference.child("posts").get().await()
 
-        val posts = dataSnapshot.children.map {
-            it.key?.let { key -> it.getValue(Post::class.java)?.copy(key = key) }
+        val posts = dataSnapshot.children.map { snapshot ->
+            snapshot.getValue(Post::class.java)?.apply {
+                key = snapshot.key.toString()
+                isUpvoted = checkIfPostWasUpVotedByUser(snapshot.key.toString())
+            }
         }
 
         emit(Resource.Success(data = posts))
@@ -122,23 +136,64 @@ class PostRepository @Inject constructor(
         emit(
             Resource.Error(
                 data = null,
-                message = it.localizedMessage ?: "Unknown error"
+                message = it.localizedMessage ?: UNKNOWN_ERROR_MESSAGE
             )
         )
     }.flowOn(Dispatchers.IO)
 
+    private suspend fun incrementUpVoteCount(postId: String) {
+        database.reference.child("posts/$postId/upvote_count")
+            .setValue(ServerValue.increment(1))
+            .await()
+    }
+
     override fun upVotePost(postId: String): Flow<Resource<Response>> = flow {
         emit(Resource.Loading())
+        val dbRef = database.reference.child("upvotes/$postId")
 
-        database.reference.child("likes").child(postId)
+        val alreadyVoted = dbRef.child("${auth.currentUser?.uid}").get().await()
+
+        if (!alreadyVoted.exists()) {
+            dbRef.setValue(mapOf("${auth.currentUser?.uid}" to "${auth.currentUser?.uid}"))
+                .await()
+
+            incrementUpVoteCount(postId)
+        }
 
         emit(Resource.Success(Response(ResponseType.SUCCESS)))
     }.catch {
         emit(
             Resource.Error(
                 data = null,
-                message = it.localizedMessage ?: "Unknown error"
+                message = it.localizedMessage ?: UNKNOWN_ERROR_MESSAGE
             )
         )
     }.flowOn(Dispatchers.IO)
+
+
+    private suspend fun decrementUpVoteCount(postId: String) {
+        database.reference.child("posts/$postId/upvote_count")
+            .setValue(ServerValue.increment(-1))
+            .await()
+    }
+
+    override fun unVotePost(postId: String): Flow<Resource<Response>> = flow {
+        emit(Resource.Loading())
+
+        val dbRef = database.reference.child("upvotes/$postId")
+
+        dbRef.child("${auth.currentUser?.uid}").removeValue()
+
+        decrementUpVoteCount(postId)
+
+        emit(Resource.Success(Response(ResponseType.SUCCESS)))
+    }.catch {
+        emit(
+            Resource.Error(
+                data = null,
+                message = it.localizedMessage ?: UNKNOWN_ERROR_MESSAGE
+            )
+        )
+    }.flowOn(Dispatchers.IO)
+
 }

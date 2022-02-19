@@ -8,6 +8,7 @@ const val INITIAL_ELAPSED_TIME = "00:00:00"
 const val NO_CAPTION_MESSAGE = "Please add a caption"
 const val NO_MEDIA_MESSAGE = "Please add a video or a photo"
 const val POST_UPLOADED_MESSAGE = "Post uploaded successfully"
+const val UNKNOWN_ERROR_MESSAGE = "Unknown Error"
 
 val FILENAME = "/JusticeApp/justice-" + SimpleDateFormat(
     FILENAME_FORMAT,

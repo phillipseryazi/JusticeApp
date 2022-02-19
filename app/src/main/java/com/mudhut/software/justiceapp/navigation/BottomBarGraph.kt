@@ -23,7 +23,15 @@ fun NavGraphBuilder.bottomBarGraph(navController: NavController) {
         builder = {
             composable(Destination.HomeScreen.route) {
                 val viewModel = hiltViewModel<HomeScreenViewModel>()
-                HomeScreen(viewModel.uiState.collectAsState().value)
+                HomeScreen(
+                    upVotePost = { postId, pos ->
+                        viewModel.upVotePost(postId, pos)
+                    },
+                    unVotePost = { postId, pos ->
+                        viewModel.unVotePost(postId, pos)
+                    },
+                    viewModel.uiState.collectAsState().value
+                )
             }
             composable(Destination.ExploreScreen.route) {
                 ExploreScreen()

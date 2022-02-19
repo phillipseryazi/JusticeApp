@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mudhut.software.justiceapp.data.models.Post
-import com.mudhut.software.justiceapp.domain.usecases.dashboard.CreatePostUseCase
+import com.mudhut.software.justiceapp.domain.usecases.posts.CreatePostUseCase
 import com.mudhut.software.justiceapp.utils.NO_CAPTION_MESSAGE
 import com.mudhut.software.justiceapp.utils.NO_MEDIA_MESSAGE
 import com.mudhut.software.justiceapp.utils.POST_UPLOADED_MESSAGE
