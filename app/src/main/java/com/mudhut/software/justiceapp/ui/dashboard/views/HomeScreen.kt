@@ -33,7 +33,7 @@ import com.mudhut.software.justiceapp.utils.simplifyCount
 fun HomeScreen(
     upVotePost: (postId: String, pos: Int) -> Unit,
     unVotePost: (postId: String, pos: Int) -> Unit,
-    getPostComments: (postId: String, page: Int) -> Unit,
+    goToComments: (postId: String) -> Unit,
     uiState: HomeScreenUiState
 ) {
     HomeScreenContentParent(
