@@ -28,15 +28,33 @@ import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 import com.mudhut.software.justiceapp.utils.checkString
 import com.mudhut.software.justiceapp.utils.simplifyCount
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     upVotePost: (postId: String, pos: Int) -> Unit,
     unVotePost: (postId: String, pos: Int) -> Unit,
+    getPostComments: (postId: String, page: Int) -> Unit,
     uiState: HomeScreenUiState
 ) {
+    HomeScreenContentParent(
+        modifier = Modifier.fillMaxSize(),
+        upVotePost = upVotePost,
+        unVotePost = unVotePost,
+        uiState = uiState,
+        onCommentsClicked = {}
+    )
+}
+
+@Composable
+fun HomeScreenContentParent(
+    modifier: Modifier,
+    upVotePost: (postId: String, pos: Int) -> Unit,
+    unVotePost: (postId: String, pos: Int) -> Unit,
+    onCommentsClicked: (postId: String) -> Unit,
+    uiState: HomeScreenUiState,
+) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier
             .background(Color.Black)
     ) {
         if (uiState.isLoading) {
@@ -48,8 +66,7 @@ fun HomeScreen(
             )
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = modifier,
                 contentPadding = PaddingValues(0.dp)
             ) {
                 itemsIndexed(uiState.posts) { index, item ->
@@ -63,7 +80,8 @@ fun HomeScreen(
                                 } else {
                                     upVotePost(item.key, index)
                                 }
-                            }
+                            },
+                            onCommentsClicked = { onCommentsClicked(item.key) }
                         )
                     }
                 }
@@ -78,6 +96,7 @@ fun HomeScreenItemComposable(
     modifier: Modifier,
     post: Post,
     onVoteClicked: () -> Unit,
+    onCommentsClicked: () -> Unit
 ) {
     val pagerState = rememberPagerState()
 
@@ -107,7 +126,7 @@ fun HomeScreenItemComposable(
             commentCount = post.comment_count,
             isUpvoted = post.isUpvoted,
             onVoteClicked = onVoteClicked,
-            onCommentsClicked = {}
+            onCommentsClicked = onCommentsClicked
         )
 
         HomeScreenInformationSection(
@@ -216,6 +235,7 @@ fun HomeScreenInformationSection(modifier: Modifier, author: String, caption: St
         )
     }
 }
+
 
 @Preview
 @Composable

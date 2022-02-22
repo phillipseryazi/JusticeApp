@@ -30,6 +30,9 @@ fun NavGraphBuilder.bottomBarGraph(navController: NavController) {
                     unVotePost = { postId, pos ->
                         viewModel.unVotePost(postId, pos)
                     },
+                    getPostComments = { postId, page ->
+                        viewModel.getPostComments(postId, page)
+                    },
                     viewModel.uiState.collectAsState().value
                 )
             }

@@ -110,12 +110,18 @@ class HomeScreenViewModel @Inject constructor(
     }
 
     private fun updateScreenOnUnVote(list: MutableList<Post?>, pos: Int) {
-        list[pos]?.upvote_count = list[pos]?.upvote_count?.minus(1)!!
+        list[pos]?.upvote_count = list[pos]?.upvote_count?.minus(1) ?: 0
         list[pos]?.isUpvoted = false
 
         uiState.value = uiState.value.copy(
             posts = list,
             message = "Post unvoted"
         )
+    }
+
+    fun getPostComments(postId: String, page: Int) {
+        viewModelScope.launch {
+
+        }
     }
 }
