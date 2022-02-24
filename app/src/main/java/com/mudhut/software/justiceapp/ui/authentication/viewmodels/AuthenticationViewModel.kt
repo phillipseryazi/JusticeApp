@@ -1,9 +1,9 @@
 package com.mudhut.software.justiceapp.ui.authentication.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mudhut.software.justiceapp.data.datastore.ProfileDatastoreManager
+import com.mudhut.software.justiceapp.data.models.Profile
 import com.mudhut.software.justiceapp.domain.usecases.auth.EmailPasswordLoginUseCase
 import com.mudhut.software.justiceapp.domain.usecases.auth.EmailPasswordRegistrationUseCase
 import com.mudhut.software.justiceapp.domain.usecases.profiles.CreateUserProfileUseCase
@@ -237,13 +237,14 @@ class AuthenticationViewModel @Inject constructor(
                         }
                         is Resource.Success -> {
                             loginUiState.value = loginUiState.value.copy(
-                                isLoading = it.data ?: false,
+                                isLoading = false,
                                 isAuthorised = true
                             )
+                            it.data?.let { profile -> datastore.updateLocalProfile(profile) }
                         }
                         is Resource.Error -> {
                             loginUiState.value = loginUiState.value.copy(
-                                isLoading = it.data ?: false,
+                                isLoading = false,
                                 hasError = true,
                                 error = createError(
                                     message = it.message ?: "Unknown error",
@@ -270,8 +271,16 @@ class AuthenticationViewModel @Inject constructor(
         } else {
             viewModelScope.launch(Dispatchers.IO) {
                 emailPasswordRegistrationUseCase.invoke(
-                    registrationUiState.value.email,
-                    registrationUiState.value.password
+                    Profile(
+                        username = registrationUiState.value.username,
+                        uid = "",
+                        email = registrationUiState.value.email,
+                        contact = registrationUiState.value.contact,
+                        userType = registrationUiState.value.userType?.label ?: "",
+                        avatar = "",
+                        isVerified = false,
+                        password = registrationUiState.value.password
+                    )
                 ).collect {
                     when (it) {
                         is Resource.Loading -> {
@@ -281,50 +290,20 @@ class AuthenticationViewModel @Inject constructor(
                         }
                         is Resource.Success -> {
                             registrationUiState.value = registrationUiState.value.copy(
-                                isLoading = it.data ?: false,
+                                isLoading = false,
                                 isAuthorised = true
                             )
-                            createUserProfile()
+                            it.data?.let { profile -> datastore.updateLocalProfile(profile) }
                         }
                         is Resource.Error -> {
                             registrationUiState.value = registrationUiState.value.copy(
-                                isLoading = it.data ?: false,
+                                isLoading = false,
                                 error = createError(
                                     message = it.message ?: "Unknown error",
                                     type = FormErrorType.TOAST
                                 )
                             )
                         }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun createUserProfile() {
-        viewModelScope.launch(Dispatchers.IO) {
-            createUserProfileUseCase.invoke(
-                registrationUiState.value.username,
-                registrationUiState.value.email,
-                registrationUiState.value.contact,
-                registrationUiState.value.userType?.label ?: "",
-                ""
-            ).collect {
-                when (it) {
-                    is Resource.Loading -> {
-                        Log.i("UserProfile", "Creating user profile")
-                    }
-                    is Resource.Success -> {
-                        datastore.updateUsername(it.data?.username ?: "")
-                        datastore.updateUid(it.data?.uid ?: "")
-                        datastore.updateUserType(it.data?.userType ?: "")
-                        datastore.updateEmail(it.data?.email ?: "")
-                        datastore.updateContact(it.data?.contact ?: "")
-                        datastore.updateAvatar(it.data?.avatar ?: "")
-                        datastore.updateIsVerified(it.data?.isVerified ?: false)
-                    }
-                    is Resource.Error -> {
-                        Log.e(tag, it.message ?: "Unknown error")
                     }
                 }
             }

@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import com.mudhut.software.justiceapp.LocalProfile
+import com.mudhut.software.justiceapp.data.models.Profile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import java.io.IOException
@@ -69,5 +70,15 @@ class ProfileDatastoreManager @Inject constructor(private val context: Context) 
         context.localProfile.updateData { profile ->
             profile.toBuilder().setIsVerified(isVerified).build()
         }
+    }
+
+    suspend fun updateLocalProfile(profile: Profile) {
+        updateUsername(profile.username)
+        updateUid(profile.uid)
+        updateUserType(profile.userType)
+        updateEmail(profile.email)
+        updateContact(profile.contact)
+        updateAvatar(profile.avatar)
+        updateIsVerified(profile.isVerified)
     }
 }

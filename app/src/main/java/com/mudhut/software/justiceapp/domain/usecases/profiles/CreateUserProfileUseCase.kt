@@ -11,20 +11,8 @@ import javax.inject.Inject
 class CreateUserProfileUseCase @Inject constructor(
     private val repository: IProfileRepository
 ) {
-    operator fun invoke(
-        username: String,
-        email: String,
-        contact: String,
-        userType: String,
-        avatar: String
-    ): Flow<Resource<Profile?>> = flow {
-        repository.createUserProfile(
-            username,
-            email,
-            contact,
-            userType,
-            avatar
-        ).collect {
+    operator fun invoke(profile: Profile): Flow<Resource<Profile>> = flow {
+        repository.createUserProfile(profile).collect {
             emit(it)
         }
     }
