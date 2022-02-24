@@ -1,32 +1,73 @@
 package com.mudhut.software.justiceapp.data.datastore
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.dataStore
+import com.mudhut.software.justiceapp.LocalProfile
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.catch
+import java.io.IOException
 import javax.inject.Inject
 
 class ProfileDatastoreManager @Inject constructor(private val context: Context) {
-    private val Context.datastore: DataStore<Preferences> by preferencesDataStore(name = "profile")
+    private val tag = "ProfileDatastoreManager"
+    private val Context.localProfile: DataStore<LocalProfile> by dataStore(
+        fileName = "user_profile.pb",
+        serializer = ProfileSerializer
+    )
 
-    suspend fun writeToDataStore(key: String, value: String) {
-        context.datastore.edit { preferences ->
-            preferences[stringPreferencesKey(key)] = value
+    val readProfile: Flow<LocalProfile> = context
+        .localProfile
+        .data
+        .catch { exception ->
+            if (exception is IOException) {
+                Log.e(tag, "Error reading sort order preferences.", exception)
+                emit(LocalProfile.getDefaultInstance())
+            } else {
+                throw exception
+            }
+        }
+
+    suspend fun updateUsername(username: String) {
+        context.localProfile.updateData { profile ->
+            profile.toBuilder().setUsername(username).build()
         }
     }
 
-    fun readFromDataStore(key: String): Flow<String> = flow {
-        context
-            .datastore
-            .data
-            .map { preferences ->
-                preferences[stringPreferencesKey(key)] ?: " "
-            }
+    suspend fun updateUid(uid: String) {
+        context.localProfile.updateData { profile ->
+            profile.toBuilder().setUid(uid).build()
+        }
     }
 
+    suspend fun updateUserType(userType: String) {
+        context.localProfile.updateData { profile ->
+            profile.toBuilder().setUserType(userType).build()
+        }
+    }
+
+    suspend fun updateEmail(email: String) {
+        context.localProfile.updateData { profile ->
+            profile.toBuilder().setEmail(email).build()
+        }
+    }
+
+    suspend fun updateContact(contact: String) {
+        context.localProfile.updateData { profile ->
+            profile.toBuilder().setContact(contact).build()
+        }
+    }
+
+    suspend fun updateAvatar(avatar: String) {
+        context.localProfile.updateData { profile ->
+            profile.toBuilder().setAvatar(avatar).build()
+        }
+    }
+
+    suspend fun updateIsVerified(isVerified: Boolean) {
+        context.localProfile.updateData { profile ->
+            profile.toBuilder().setIsVerified(isVerified).build()
+        }
+    }
 }

@@ -74,6 +74,8 @@ class AuthenticationViewModel @Inject constructor(
     private val emailPasswordLoginUseCase: EmailPasswordLoginUseCase,
     private val createUserProfileUseCase: CreateUserProfileUseCase
 ) : ViewModel() {
+    private val tag = "AuthenticationViewModel"
+
     var uiError: String? = null
 
     var registrationUiState = MutableStateFlow(AuthUiState.RegistrationUiState())
@@ -313,14 +315,16 @@ class AuthenticationViewModel @Inject constructor(
                         Log.i("UserProfile", "Creating user profile")
                     }
                     is Resource.Success -> {
-                        datastore.writeToDataStore("Username", it.data?.username ?: "")
-                        datastore.writeToDataStore("Email", it.data?.email ?: "")
-                        datastore.writeToDataStore("Contact", it.data?.contact ?: "")
-                        datastore.writeToDataStore("UserType", it.data?.userType ?: "")
-                        datastore.writeToDataStore("Avatar", it.data?.avatar ?: "")
+                        datastore.updateUsername(it.data?.username ?: "")
+                        datastore.updateUid(it.data?.uid ?: "")
+                        datastore.updateUserType(it.data?.userType ?: "")
+                        datastore.updateEmail(it.data?.email ?: "")
+                        datastore.updateContact(it.data?.contact ?: "")
+                        datastore.updateAvatar(it.data?.avatar ?: "")
+                        datastore.updateIsVerified(it.data?.isVerified ?: false)
                     }
                     is Resource.Error -> {
-                        Log.e("UserProfile", it.message ?: "Unknown error")
+                        Log.e(tag, it.message ?: "Unknown error")
                     }
                 }
             }

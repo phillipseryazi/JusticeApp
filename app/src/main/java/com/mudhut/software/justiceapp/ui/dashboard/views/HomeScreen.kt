@@ -133,7 +133,7 @@ fun HomeScreenItemComposable(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(start = 16.dp, bottom = 120.dp),
-            author = post.author,
+            author = post.author.name,
             caption = post.caption
         )
     }

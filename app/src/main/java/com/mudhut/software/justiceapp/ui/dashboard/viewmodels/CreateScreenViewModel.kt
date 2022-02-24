@@ -3,6 +3,7 @@ package com.mudhut.software.justiceapp.ui.dashboard.viewmodels
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mudhut.software.justiceapp.data.models.Author
 import com.mudhut.software.justiceapp.data.models.Post
 import com.mudhut.software.justiceapp.domain.usecases.posts.CreatePostUseCase
 import com.mudhut.software.justiceapp.utils.NO_CAPTION_MESSAGE
@@ -61,6 +62,7 @@ class CreateScreenViewModel @Inject constructor(
             }
             else -> {
                 val post = Post(
+                    author = Author(name = "", uid = ""),
                     caption = uiState.value.caption ?: "",
                     media = uiState.value.uris.ifEmpty { listOf() },
                     created_at = System.currentTimeMillis().toString()
