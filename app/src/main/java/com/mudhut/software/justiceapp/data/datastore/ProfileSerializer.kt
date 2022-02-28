@@ -13,10 +13,11 @@ object ProfileSerializer : Serializer<LocalProfile> {
         get() = LocalProfile.getDefaultInstance()
 
     override suspend fun readFrom(input: InputStream): LocalProfile {
-        try {
-            return LocalProfile.parseFrom(input)
+        return try {
+            LocalProfile.parseFrom(input)
         } catch (exception: InvalidProtocolBufferException) {
             throw CorruptionException("Can not read proto", exception)
+            defaultValue
         }
     }
 

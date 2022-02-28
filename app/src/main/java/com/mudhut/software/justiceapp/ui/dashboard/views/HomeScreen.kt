@@ -41,7 +41,7 @@ fun HomeScreen(
         upVotePost = upVotePost,
         unVotePost = unVotePost,
         uiState = uiState,
-        onCommentsClicked = {}
+        goToComments = goToComments
     )
 }
 
@@ -50,7 +50,7 @@ fun HomeScreenContentParent(
     modifier: Modifier,
     upVotePost: (postId: String, pos: Int) -> Unit,
     unVotePost: (postId: String, pos: Int) -> Unit,
-    onCommentsClicked: (postId: String) -> Unit,
+    goToComments: (postId: String) -> Unit,
     uiState: HomeScreenUiState,
 ) {
     Box(
@@ -81,7 +81,7 @@ fun HomeScreenContentParent(
                                     upVotePost(item.key, index)
                                 }
                             },
-                            onCommentsClicked = { onCommentsClicked(item.key) }
+                            onCommentsClicked = { goToComments(item.key) }
                         )
                     }
                 }
@@ -133,7 +133,7 @@ fun HomeScreenItemComposable(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(start = 16.dp, bottom = 120.dp),
-            author = post.author.name,
+            author = post.author?.username ?: "",
             caption = post.caption
         )
     }
@@ -212,7 +212,11 @@ fun IconButtonAndLabel(
 }
 
 @Composable
-fun HomeScreenInformationSection(modifier: Modifier, author: String, caption: String) {
+fun HomeScreenInformationSection(
+    modifier: Modifier,
+    author: String,
+    caption: String
+) {
     Column(modifier = modifier) {
         Text(
             modifier = Modifier.width(200.dp),
@@ -252,10 +256,3 @@ fun HomeScreenInteractionSectionPreview() {
     }
 }
 
-//@Preview
-//@Composable
-//fun HomeScreenPreview() {
-//    JusticeAppTheme {
-//        HomeScreen(uiState = HomeScreenUiState())
-//    }
-//}

@@ -3,10 +3,11 @@ package com.mudhut.software.justiceapp.ui.dashboard.views
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -19,11 +20,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mudhut.software.justiceapp.R
+import com.mudhut.software.justiceapp.data.models.Comment
 import com.mudhut.software.justiceapp.ui.theme.JusticeAppTheme
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun CommentScreen(
+    getComments: (postId: String) -> Unit,
     postComment: (postId: String, comment: String) -> Unit,
     navigateBack: () -> Unit
 ) {
@@ -32,56 +35,60 @@ fun CommentScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        TopBarSectionComposable(navigateBack = {})
+        TopBarSectionComposable(navigateBack = navigateBack)
     }
 }
 
 @Composable
 fun TopBarSectionComposable(navigateBack: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Spacer(modifier = Modifier.width(8.dp))
-        Button(
-            modifier = Modifier
-                .size(50.dp),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.Transparent
-            ),
-            elevation = ButtonDefaults.elevation(
-                defaultElevation = 0.dp,
-                pressedElevation = 0.dp
-            ),
-            contentPadding = PaddingValues(0.dp),
-            onClick = navigateBack
-        ) {
-            Icon(
-                modifier = Modifier.size(ButtonDefaults.IconSize * 2),
-                painter = painterResource(
-                    id = R.drawable.ic_close
-                ),
-                tint = Color.Blue,
-                contentDescription = null
+    TopAppBar(
+        modifier = Modifier.fillMaxWidth(),
+        title = {
+            Text(
+                stringResource(R.string.text_comment),
+                style = MaterialTheme.typography.h1,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = Color.Blue,
+                textAlign = TextAlign.Center,
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = navigateBack) {
+                Icon(
+                    modifier = Modifier
+                        .size(ButtonDefaults.IconSize * 2),
+                    painter = painterResource(
+                        id = R.drawable.ic_close
+                    ),
+                    tint = Color.Blue,
+                    contentDescription = null
+                )
+            }
+        },
+        backgroundColor = Color.White,
+        elevation = 2.dp
+    )
+}
+
+@Composable
+fun CommentListSectionComposable(comments: List<Comment>) {
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        itemsIndexed(comments) { index, item ->
+            CommentComposable(
+                avatar = item.author.avatar,
+                author = item.author.username,
+                comment = item.content
             )
         }
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            stringResource(R.string.text_comment),
-            modifier = Modifier.align(Alignment.CenterVertically),
-            style = MaterialTheme.typography.h1,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            color = Color.Blue,
-            textAlign = TextAlign.Center,
-        )
     }
 }
 
 @Composable
-fun CommentListSectionComposable() {
-
-}
-
-@Composable
-fun CommentComposable(avatar: Int, author: String, comment: String) {
+fun CommentComposable(avatar: String, author: String, comment: String) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row() {
             GlideImage(
@@ -107,11 +114,20 @@ fun CommentComposable(avatar: Int, author: String, comment: String) {
     }
 }
 
+@Composable
+fun WriteCommentSectionComposable() {
+
+}
+
 
 @Preview
 @Composable
 fun CommentScreenPreview() {
     JusticeAppTheme {
-        CommentScreen(postComment = { postId, comment -> }, navigateBack = {})
+        CommentScreen(
+            postComment = { postId, comment -> },
+            getComments = { postId -> },
+            navigateBack = {}
+        )
     }
 }

@@ -13,17 +13,20 @@ import javax.inject.Inject
 
 class ProfileDatastoreManager @Inject constructor(private val context: Context) {
     private val tag = "ProfileDatastoreManager"
-    private val Context.localProfile: DataStore<LocalProfile> by dataStore(
-        fileName = "user_profile.pb",
-        serializer = ProfileSerializer
-    )
+
+    companion object {
+        private val Context.localProfile: DataStore<LocalProfile> by dataStore(
+            fileName = "user_profile.pb",
+            serializer = ProfileSerializer
+        )
+    }
 
     val readProfile: Flow<LocalProfile> = context
         .localProfile
         .data
         .catch { exception ->
             if (exception is IOException) {
-                Log.e(tag, "Error reading sort order preferences.", exception)
+                Log.e(tag, "Error reading sort order preferences", exception)
                 emit(LocalProfile.getDefaultInstance())
             } else {
                 throw exception

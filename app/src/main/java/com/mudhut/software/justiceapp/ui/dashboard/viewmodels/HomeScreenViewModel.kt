@@ -56,7 +56,7 @@ class HomeScreenViewModel @Inject constructor(
                             isLoading = false,
                             message = it.message ?: UNKNOWN_ERROR_MESSAGE
                         )
-                        it.message?.let { err -> Log.e(tag, "Error: $err") }
+                        it.message?.let { err -> Log.e(tag, err) }
                     }
                 }
             }
@@ -118,10 +118,5 @@ class HomeScreenViewModel @Inject constructor(
             message = "Post unvoted"
         )
     }
-
-    fun getPostComments(postId: String, page: Int) {
-        viewModelScope.launch {
-
-        }
-    }
 }
+

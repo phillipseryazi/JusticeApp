@@ -10,7 +10,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ServerValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mudhut.software.justiceapp.BuildConfig
-import com.mudhut.software.justiceapp.data.models.Author
 import com.mudhut.software.justiceapp.data.models.Post
 import com.mudhut.software.justiceapp.utils.Resource
 import com.mudhut.software.justiceapp.utils.Response
@@ -69,7 +68,11 @@ class PostRepository @Inject constructor(
             "created_at" to post.created_at,
             "upvote_count" to post.upvote_count,
             "comment_count" to post.comment_count,
-            "author" to auth.currentUser?.uid,
+            "author" to mapOf(
+                "username" to post.author?.username,
+                "uid" to post.author?.uid,
+                "avatar" to post.author?.avatar
+            ),
             "media" to downloadUrls,
             "key" to ""
         )
@@ -126,14 +129,7 @@ class PostRepository @Inject constructor(
         val dataSnapshot = database.reference.child("posts").get().await()
 
         val posts = dataSnapshot.children.map { snapshot ->
-            val storeResult = firestore.collection("profiles").document("").get().await()
-
             snapshot.getValue(Post::class.java)?.apply {
-                author = Author(
-                    name = storeResult.getString("username").toString(),
-                    uid = storeResult.id,
-                    avatar = storeResult.getString("avatar")
-                )
                 key = snapshot.key.toString()
                 isUpvoted = checkIfPostWasUpVotedByUser(snapshot.key.toString())
             }
