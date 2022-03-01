@@ -29,7 +29,7 @@ fun NavGraphBuilder.homeScreenGraph(navController: NavController) {
                     goToComments = { postId ->
                         navController.navigate("${Destination.CommentScreen.route}/$postId")
                     },
-                    viewModel.uiState.collectAsState().value
+                    uiState = viewModel.uiState.collectAsState().value
                 )
             }
 
@@ -47,7 +47,8 @@ fun NavGraphBuilder.homeScreenGraph(navController: NavController) {
                     postComment = { postId, content ->
                         viewModel.postComments(postId, content)
                     },
-                    navigateBack = { navController.popBackStack() }
+                    navigateBack = { navController.popBackStack() },
+                    uiState = viewModel.uiState.collectAsState().value
                 )
             }
         }

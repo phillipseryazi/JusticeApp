@@ -15,7 +15,8 @@ import javax.inject.Inject
 
 data class CommentScreenUiState(
     var isLoading: Boolean = false,
-    var comments: List<Comment> = mutableStateListOf()
+    var comments: List<Comment> = mutableStateListOf(),
+    var newComment: String = ""
 )
 
 @HiltViewModel
