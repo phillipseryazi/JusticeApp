@@ -1,9 +1,9 @@
 package com.mudhut.software.justiceapp.ui.authentication.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mudhut.software.justiceapp.data.datastore.ProfileDatastoreManager
+import com.mudhut.software.justiceapp.data.models.Profile
 import com.mudhut.software.justiceapp.domain.usecases.auth.EmailPasswordLoginUseCase
 import com.mudhut.software.justiceapp.domain.usecases.auth.EmailPasswordRegistrationUseCase
 import com.mudhut.software.justiceapp.domain.usecases.profiles.CreateUserProfileUseCase
@@ -74,6 +74,8 @@ class AuthenticationViewModel @Inject constructor(
     private val emailPasswordLoginUseCase: EmailPasswordLoginUseCase,
     private val createUserProfileUseCase: CreateUserProfileUseCase
 ) : ViewModel() {
+    private val tag = "AuthenticationViewModel"
+
     var uiError: String? = null
 
     var registrationUiState = MutableStateFlow(AuthUiState.RegistrationUiState())
@@ -235,13 +237,14 @@ class AuthenticationViewModel @Inject constructor(
                         }
                         is Resource.Success -> {
                             loginUiState.value = loginUiState.value.copy(
-                                isLoading = it.data ?: false,
+                                isLoading = false,
                                 isAuthorised = true
                             )
+                            it.data?.let { profile -> datastore.updateLocalProfile(profile) }
                         }
                         is Resource.Error -> {
                             loginUiState.value = loginUiState.value.copy(
-                                isLoading = it.data ?: false,
+                                isLoading = false,
                                 hasError = true,
                                 error = createError(
                                     message = it.message ?: "Unknown error",
@@ -268,8 +271,16 @@ class AuthenticationViewModel @Inject constructor(
         } else {
             viewModelScope.launch(Dispatchers.IO) {
                 emailPasswordRegistrationUseCase.invoke(
-                    registrationUiState.value.email,
-                    registrationUiState.value.password
+                    Profile(
+                        username = registrationUiState.value.username,
+                        uid = "",
+                        email = registrationUiState.value.email,
+                        contact = registrationUiState.value.contact,
+                        userType = registrationUiState.value.userType?.label ?: "",
+                        avatar = "",
+                        isVerified = false,
+                        password = registrationUiState.value.password
+                    )
                 ).collect {
                     when (it) {
                         is Resource.Loading -> {
@@ -279,48 +290,20 @@ class AuthenticationViewModel @Inject constructor(
                         }
                         is Resource.Success -> {
                             registrationUiState.value = registrationUiState.value.copy(
-                                isLoading = it.data ?: false,
+                                isLoading = false,
                                 isAuthorised = true
                             )
-                            createUserProfile()
+                            it.data?.let { profile -> datastore.updateLocalProfile(profile) }
                         }
                         is Resource.Error -> {
                             registrationUiState.value = registrationUiState.value.copy(
-                                isLoading = it.data ?: false,
+                                isLoading = false,
                                 error = createError(
                                     message = it.message ?: "Unknown error",
                                     type = FormErrorType.TOAST
                                 )
                             )
                         }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun createUserProfile() {
-        viewModelScope.launch(Dispatchers.IO) {
-            createUserProfileUseCase.invoke(
-                registrationUiState.value.username,
-                registrationUiState.value.email,
-                registrationUiState.value.contact,
-                registrationUiState.value.userType?.label ?: "",
-                ""
-            ).collect {
-                when (it) {
-                    is Resource.Loading -> {
-                        Log.i("UserProfile", "Creating user profile")
-                    }
-                    is Resource.Success -> {
-                        datastore.writeToDataStore("Username", it.data?.username ?: "")
-                        datastore.writeToDataStore("Email", it.data?.email ?: "")
-                        datastore.writeToDataStore("Contact", it.data?.contact ?: "")
-                        datastore.writeToDataStore("UserType", it.data?.userType ?: "")
-                        datastore.writeToDataStore("Avatar", it.data?.avatar ?: "")
-                    }
-                    is Resource.Error -> {
-                        Log.e("UserProfile", it.message ?: "Unknown error")
                     }
                 }
             }

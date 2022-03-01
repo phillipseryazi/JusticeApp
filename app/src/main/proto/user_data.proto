@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option java_package = "com.mudhut.software.justiceapp";
+option java_multiple_files = true;
+
+message LocalProfile{
+  string username = 1;
+  string uid = 2;
+  string userType = 3;
+  string email = 4;
+  string contact = 5;
+  string avatar = 6;
+  bool isVerified = 7;
+}

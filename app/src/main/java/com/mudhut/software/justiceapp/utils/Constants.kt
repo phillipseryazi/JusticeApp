@@ -10,6 +10,8 @@ const val NO_MEDIA_MESSAGE = "Please add a video or a photo"
 const val POST_UPLOADED_MESSAGE = "Post uploaded successfully"
 const val UNKNOWN_ERROR_MESSAGE = "Unknown Error"
 
+const val HOME_SCREEN_GRAPH = "home_screen_graph"
+
 val FILENAME = "/JusticeApp/justice-" + SimpleDateFormat(
     FILENAME_FORMAT,
     Locale.US

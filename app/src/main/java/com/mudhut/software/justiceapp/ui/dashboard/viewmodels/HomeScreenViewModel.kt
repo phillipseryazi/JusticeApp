@@ -56,7 +56,7 @@ class HomeScreenViewModel @Inject constructor(
                             isLoading = false,
                             message = it.message ?: UNKNOWN_ERROR_MESSAGE
                         )
-                        it.message?.let { err -> Log.e(tag, "Error: $err") }
+                        it.message?.let { err -> Log.e(tag, err) }
                     }
                 }
             }
@@ -110,7 +110,7 @@ class HomeScreenViewModel @Inject constructor(
     }
 
     private fun updateScreenOnUnVote(list: MutableList<Post?>, pos: Int) {
-        list[pos]?.upvote_count = list[pos]?.upvote_count?.minus(1)!!
+        list[pos]?.upvote_count = list[pos]?.upvote_count?.minus(1) ?: 0
         list[pos]?.isUpvoted = false
 
         uiState.value = uiState.value.copy(
@@ -119,3 +119,4 @@ class HomeScreenViewModel @Inject constructor(
         )
     }
 }
+

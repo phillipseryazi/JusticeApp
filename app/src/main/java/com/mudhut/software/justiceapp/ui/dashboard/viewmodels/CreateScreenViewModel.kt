@@ -1,8 +1,12 @@
 package com.mudhut.software.justiceapp.ui.dashboard.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mudhut.software.justiceapp.LocalProfile
+import com.mudhut.software.justiceapp.data.datastore.ProfileDatastoreManager
+import com.mudhut.software.justiceapp.data.models.Author
 import com.mudhut.software.justiceapp.data.models.Post
 import com.mudhut.software.justiceapp.domain.usecases.posts.CreatePostUseCase
 import com.mudhut.software.justiceapp.utils.NO_CAPTION_MESSAGE
@@ -13,6 +17,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,8 +30,11 @@ data class CreateScreenUiState(
 
 @HiltViewModel
 class CreateScreenViewModel @Inject constructor(
-    private val createPostUseCase: CreatePostUseCase
+    private val createPostUseCase: CreatePostUseCase,
+    private val datastore: ProfileDatastoreManager
 ) : ViewModel() {
+
+    private val tag = "CreateScreenViewModel"
 
     var uiState = MutableStateFlow(CreateScreenUiState())
         private set
@@ -51,6 +59,15 @@ class CreateScreenViewModel @Inject constructor(
         uiState.value = uiState.value.copy(caption = caption)
     }
 
+    private suspend fun getLocalProfile(): LocalProfile {
+        return try {
+            datastore.readProfile.first()
+        } catch (e: Exception) {
+            Log.e(tag, "Datastore Error", e)
+            LocalProfile.getDefaultInstance()
+        }
+    }
+
     fun postItem() {
         when {
             uiState.value.caption?.trim()?.isEmpty() == true -> {
@@ -60,13 +77,22 @@ class CreateScreenViewModel @Inject constructor(
                 uiState.value = uiState.value.copy(message = NO_MEDIA_MESSAGE)
             }
             else -> {
-                val post = Post(
-                    caption = uiState.value.caption ?: "",
-                    media = uiState.value.uris.ifEmpty { listOf() },
-                    created_at = System.currentTimeMillis().toString()
-                )
-
                 viewModelScope.launch(Dispatchers.IO) {
+                    val localProfile = getLocalProfile()
+
+                    val author = Author(
+                        localProfile.username,
+                        localProfile.uid,
+                        localProfile.avatar
+                    )
+
+                    val post = Post(
+                        author = author,
+                        caption = uiState.value.caption ?: "",
+                        media = uiState.value.uris.ifEmpty { listOf() },
+                        created_at = System.currentTimeMillis()
+                    )
+
                     createPostUseCase.invoke(post).collect {
                         when (it) {
                             is Resource.Loading -> {

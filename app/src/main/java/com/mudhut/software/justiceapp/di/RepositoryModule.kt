@@ -20,15 +20,23 @@ import javax.inject.Singleton
 object RepositoryModule {
     @Singleton
     @Provides
-    fun providesAuthenticationRepository(firebaseAuth: FirebaseAuth) =
-        AuthenticationRepository(firebaseAuth) as IAuthenticationRepository
+    fun providesAuthenticationRepository(
+        firestore: FirebaseFirestore,
+        firebaseAuth: FirebaseAuth
+    ) = AuthenticationRepository(
+        firestore,
+        firebaseAuth
+    ) as IAuthenticationRepository
 
     @Singleton
     @Provides
     fun providesProfileRepository(
         firestore: FirebaseFirestore,
-        auth: FirebaseAuth
-    ) = ProfileRepository(firestore, auth) as IProfileRepository
+        firebaseAuth: FirebaseAuth
+    ) = ProfileRepository(
+        firestore,
+        firebaseAuth
+    ) as IProfileRepository
 
     @Singleton
     @Provides

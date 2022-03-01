@@ -68,7 +68,11 @@ class PostRepository @Inject constructor(
             "created_at" to post.created_at,
             "upvote_count" to post.upvote_count,
             "comment_count" to post.comment_count,
-            "author" to auth.currentUser?.uid,
+            "author" to mapOf(
+                "username" to post.author?.username,
+                "uid" to post.author?.uid,
+                "avatar" to post.author?.avatar
+            ),
             "media" to downloadUrls,
             "key" to ""
         )

@@ -4,20 +4,26 @@ enum class DestinationType {
     DASHBOARD
 }
 
-sealed class Destination(val route: String, val type: DestinationType? = null) {
+sealed class Destination(
+    val route: String,
+    val type: DestinationType? = null
+) {
+    // Authentication
     object LoginScreen : Destination(LOGIN_SCREEN)
     object OnBoardingScreen : Destination(ONBOARDING_SCREEN)
     object RegistrationScreen : Destination(REGISTRATION_SCREEN)
     object DashboardScreen : Destination(DASHBOARD_SCREEN)
 
+    // Dashboard
     object HomeScreen : Destination(HOME_SCREEN, DestinationType.DASHBOARD)
     object ExploreScreen : Destination(EXPLORE_SCREEN, DestinationType.DASHBOARD)
     object CreateScreen : Destination(CREATE_SCREEN)
     object InboxScreen : Destination(NOTIFICATION_SCREEN, DestinationType.DASHBOARD)
     object SettingsScreen : Destination(PROFILE_SCREEN, DestinationType.DASHBOARD)
-
-
     object CameraScreen : Destination(CAMERA_SCREEN)
+
+    // Comments
+    object CommentScreen : Destination(COMMENTS_SCREEN)
 
     companion object {
         // Auth routes
@@ -35,6 +41,9 @@ sealed class Destination(val route: String, val type: DestinationType? = null) {
 
         // Camera route
         private const val CAMERA_SCREEN = "camera_screen"
+
+        // Comments route
+        private const val COMMENTS_SCREEN = "comments_screen"
 
     }
 }

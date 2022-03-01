@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.mudhut.software.justiceapp.data.models.Profile
 import com.mudhut.software.justiceapp.utils.Resource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -13,38 +14,36 @@ import javax.inject.Inject
 
 class ProfileRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val firebaseAuth: FirebaseAuth
+    private val auth: FirebaseAuth
 ) : IProfileRepository {
 
-    override fun createUserProfile(
-        username: String,
-        email: String,
-        contact: String,
-        userType: String,
-        avatar: String
-    ) = flow {
+    override fun createUserProfile(profile: Profile): Flow<Resource<Profile>> = flow {
         emit(Resource.Loading())
 
+        val uid = auth.currentUser?.uid
+
         val userMap = mutableMapOf(
-            "username" to username,
-            "email" to email,
-            "contact" to contact,
-            "userType" to userType,
-            "avatar" to avatar,
-            "isVerified" to false
+            "username" to profile.username,
+            "uid" to uid,
+            "email" to profile.email,
+            "contact" to profile.contact,
+            "userType" to profile.userType,
+            "avatar" to profile.avatar,
+            "isVerified" to profile.isVerified
         )
 
-        firebaseAuth.uid?.let {
-            firestore.collection("profiles").document(it).set(userMap).await()
-        }
+        if (uid != null) {
+            firestore.collection("profiles").document(uid).set(userMap).await()
 
-        val profile = firebaseAuth.uid?.let {
-            firestore.collection("profiles").document(it).get().await()
+            val userProfile = firestore
+                .collection("profiles")
+                .document(uid)
+                .get()
+                .await()
                 .toObject(Profile::class.java)
+
+            emit(Resource.Success(data = userProfile!!))
         }
-
-        emit(Resource.Success(data = profile))
-
     }.catch {
         emit(Resource.Error(data = null, message = it.localizedMessage ?: "Unknown error"))
     }.flowOn(Dispatchers.IO)

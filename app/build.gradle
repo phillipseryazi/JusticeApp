@@ -5,6 +5,7 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id 'com.google.gms.google-services'
     id 'com.google.secrets_gradle_plugin' version '0.4'
+    id 'com.google.protobuf' version '0.8.17'
 }
 apply plugin: 'kotlin-android'
 
@@ -108,14 +109,15 @@ dependencies {
 
     // Datastore
     def datastore_version = "1.0.0"
-    implementation "androidx.datastore:datastore-preferences:$datastore_version"
+    implementation "androidx.datastore:datastore:$datastore_version"
+    implementation "com.google.protobuf:protobuf-javalite:3.18.0"
 
     // Accompanist permissions
     def accompanist_permissions = "0.21.1-beta"
     implementation "com.google.accompanist:accompanist-permissions:$accompanist_permissions"
 
     // CameraX
-    def camerax_version = "1.1.0-beta01"
+    def camerax_version = "1.1.0-beta02"
     implementation "androidx.camera:camera-core:$camerax_version"
     implementation "androidx.camera:camera-camera2:$camerax_version"
     implementation "androidx.camera:camera-lifecycle:$camerax_version"
@@ -155,4 +157,27 @@ dependencies {
     // Sili Compressor
     def sili_compressor_version = "2.2.4"
     implementation "com.iceteck.silicompressorr:silicompressor:$sili_compressor_version"
+
+    // Constraint layout compose
+    def constraint_layout_version = "1.0.0"
+    implementation "androidx.constraintlayout:constraintlayout-compose:$constraint_layout_version"
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.14.0"
+    }
+
+    // Generates the java Protobuf-lite code for the Protobufs in this project. See
+    // https://github.com/google/protobuf-gradle-plugin#customizing-protobuf-compilation
+    // for more information.
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option 'lite'
+                }
+            }
+        }
+    }
 }
